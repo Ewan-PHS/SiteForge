@@ -402,15 +402,15 @@ points = meshlib.mrmeshnumpy.pointCloudFromPoints(xyz_load)
 # params.radius = 4
 mesh = meshlib.mrmeshpy.triangulatePointCloud(points, )#params)
 
-# Find single edge for each hole in mesh
-hole_edges = mesh.topology.findHoleRepresentiveEdges()
+# # Find single edge for each hole in mesh
+# hole_edges = mesh.topology.findHoleRepresentiveEdges()
  
-for e in hole_edges:
-    #  Setup filling parameters
-    params = meshlib.mrmeshpy.FillHoleParams()
-    params.metric = meshlib.mrmeshpy.getUniversalMetric(mesh)
-    #  Fill hole represented by 'e'
-    meshlib.mrmeshpy.fillHole(mesh, e, params)
+# for e in hole_edges:
+#     #  Setup filling parameters
+#     params = meshlib.mrmeshpy.FillHoleParams()
+#     params.metric = meshlib.mrmeshpy.getUniversalMetric(mesh)
+#     #  Fill hole represented by 'e'
+#     meshlib.mrmeshpy.fillHole(mesh, e, params)
 
 # To get the end time of execution
 end_time = time.perf_counter()
@@ -418,10 +418,15 @@ end_time = time.perf_counter()
 # Save the resulting mesh
 meshlib.mrmeshpy.saveMesh(mesh, (f'{path_to_save}\\{name_to_save}.stl'))
 
-print(f"""###############################################
-      Name: {name_to_save}
-      Execution time: {end_time - start_time} seconds
-      ##############################################""")
+end_save_time = time.perf_counter()
+
+print(f"""
+################################################
+Name: {name_to_save}
+Execution time: {end_time - start_time} seconds
+Save time: {end_save_time - end_time} seconds
+################################################
+""")
 
 # meshlib.mrviewerpy.addMeshToScene(mesh, f"{name_to_save}.stl")
 # meshlib.mrviewerpy.launch()
