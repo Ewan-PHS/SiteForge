@@ -11,23 +11,24 @@ type
   TForm1 = class(TForm)
     btnTop: TButton;
     btnFront: TButton;
-    btnSide: TButton;
+    btnRight: TButton;
     pnlPreview: TPanel;
     Image4: TImage;
     lblPreview: TLabel;
     btnGenerate: TButton;
-    Panel1: TPanel;
+    pnlFrontView: TPanel;
     imgFront: TImage;
-    Panel2: TPanel;
-    Panel3: TPanel;
+    pnlTopView: TPanel;
+    pnlRightView: TPanel;
     imgTop: TImage;
     imgSide: TImage;
-    Label1: TLabel;
+    lblTitle: TLabel;
     procedure btnFrontClick(Sender: TObject);
     procedure btnTopClick(Sender: TObject);
-    procedure btnSideClick(Sender: TObject);
+    procedure btnRightClick(Sender: TObject);
   private
-    { Private declarations }
+    var
+      sImgPathTopView, sImgPathFrontView, sImgPathRightView : String;
   public
     { Public declarations }
   end;
@@ -54,6 +55,7 @@ begin
       imgFront.Picture.LoadFromFile(OpenDialog.FileName);
       imgFront.Center := True;
       imgFront.Stretch := True;
+      sImgPathFrontView := OpenDialog.FileName;
     end;
   finally
     OpenDialog.Free;
@@ -61,7 +63,7 @@ begin
 
 end;
 
-procedure TForm1.btnSideClick(Sender: TObject);
+procedure TForm1.btnRightClick(Sender: TObject);
 var
   OpenDialog: TOpenDialog;
 begin
@@ -76,6 +78,7 @@ begin
       imgSide.Picture.LoadFromFile(OpenDialog.FileName);
       imgSide.Center := True;
       imgSide.Stretch := True;
+      sImgPathRightView := OpenDialog.FileName;
     end;
   finally
     OpenDialog.Free;
@@ -98,6 +101,7 @@ begin
       imgTop.Picture.LoadFromFile(OpenDialog.FileName);
       imgTop.Center := True;
       imgTop.Stretch := True;
+      sImgPathTopView := OpenDialog.FileName;
     end;
   finally
     OpenDialog.Free;

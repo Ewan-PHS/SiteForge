@@ -5,63 +5,51 @@ object Form1: TForm1
   ClientHeight = 494
   ClientWidth = 680
   Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
+  Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
-  Font.Height = -12
-  Font.Name = 'Segoe UI'
+  Font.Height = -16
+  Font.Name = 'Sitka Banner'
   Font.Style = []
-  TextHeight = 15
-  object Label1: TLabel
-    Left = 40
-    Top = 24
-    Width = 34
-    Height = 15
-    Caption = 'Label1'
+  TextHeight = 23
+  object lblTitle: TLabel
+    Left = 136
+    Top = 8
+    Width = 394
+    Height = 92
+    Caption = 'Temporary Title'
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -64
+    Font.Name = 'Sitka Banner'
+    Font.Style = []
+    ParentFont = False
   end
   object btnTop: TButton
     Left = 8
-    Top = 244
+    Top = 236
     Width = 121
     Height = 25
-    Caption = 'Pick a top view'
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -15
-    Font.Name = 'Times New Roman'
-    Font.Style = []
-    ParentFont = False
+    Caption = 'Select a top view'
     TabOrder = 0
     OnClick = btnTopClick
   end
   object btnFront: TButton
     Left = 8
-    Top = 438
+    Top = 430
     Width = 121
     Height = 25
-    Caption = 'Pick a front view'
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -15
-    Font.Name = 'Times New Roman'
-    Font.Style = []
-    ParentFont = False
+    Caption = 'Select a front view'
     TabOrder = 1
     OnClick = btnFrontClick
   end
-  object btnSide: TButton
+  object btnRight: TButton
     Left = 177
-    Top = 244
+    Top = 236
     Width = 121
     Height = 25
-    Caption = 'Pick a side view'
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -15
-    Font.Name = 'Times New Roman'
-    Font.Style = []
-    ParentFont = False
+    Caption = 'Select a right view'
     TabOrder = 2
-    OnClick = btnSideClick
+    OnClick = btnRightClick
   end
   object pnlPreview: TPanel
     Left = 336
@@ -90,7 +78,7 @@ object Form1: TForm1
     end
   end
   object btnGenerate: TButton
-    Left = 169
+    Left = 161
     Top = 359
     Width = 153
     Height = 58
@@ -98,12 +86,12 @@ object Form1: TForm1
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -19
-    Font.Name = 'Times New Roman'
+    Font.Name = 'Sitka Banner'
     Font.Style = []
     ParentFont = False
     TabOrder = 4
   end
-  object Panel1: TPanel
+  object pnlFrontView: TPanel
     Left = 8
     Top = 304
     Width = 121
@@ -116,7 +104,7 @@ object Form1: TForm1
       Height = 105
     end
   end
-  object Panel2: TPanel
+  object pnlTopView: TPanel
     Left = 8
     Top = 110
     Width = 121
@@ -129,7 +117,7 @@ object Form1: TForm1
       Height = 105
     end
   end
-  object Panel3: TPanel
+  object pnlRightView: TPanel
     Left = 177
     Top = 110
     Width = 121
