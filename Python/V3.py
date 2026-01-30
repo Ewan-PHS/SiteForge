@@ -423,23 +423,23 @@ points = meshlib.mrmeshnumpy.pointCloudFromPoints(xyz_load)
 # params.radius = 4
 mesh = meshlib.mrmeshpy.triangulatePointCloud(points)#, params)
 
-meshlib.mrmeshpy.saveMesh(mesh, (f'SIP_Project\\tmp\\{name_to_save}_tmp.ply'))
+meshlib.mrmeshpy.saveMesh(mesh, (f'Python\\tmp\\{name_to_save}_tmp.ply'))
 
-v, f = pcu.load_mesh_vf(f'SIP_Project\\tmp\\{name_to_save}_tmp.ply')
+v, f = pcu.load_mesh_vf(f'Python\\tmp\\{name_to_save}_tmp.ply')
 
-if os.path.exists(f'SIP_Project\\tmp\\{name_to_save}_tmp.ply'):
-    os.remove(f'SIP_Project\\tmp\\{name_to_save}_tmp.ply')
+if os.path.exists(f'Python\\tmp\\{name_to_save}_tmp.ply'):
+    os.remove(f'Python\\tmp\\{name_to_save}_tmp.ply')
     print("tmp .ply deleted.")
 
-resolution = 15000
+resolution = 12500
 v_watertight, f_watertight = pcu.make_mesh_watertight(v, f, resolution=resolution)
 
-pcu.save_mesh_vf(v=v_watertight, f=f_watertight, filename=(f'SIP_Project\\tmp\\{name_to_save}_tmp-final.ply'))
+pcu.save_mesh_vf(v=v_watertight, f=f_watertight, filename=(f'Python\\tmp\\{name_to_save}_tmp-final.ply'))
 
-output_mesh = meshio.read(f'SIP_Project\\tmp\\{name_to_save}_tmp-final.ply')
+output_mesh = meshio.read(f'Python\\tmp\\{name_to_save}_tmp-final.ply')
 
-if os.path.exists(f'SIP_Project\\tmp\\{name_to_save}_tmp-final.ply'):
-    os.remove(f'SIP_Project\\tmp\\{name_to_save}_tmp-final.ply')
+if os.path.exists(f'Python\\tmp\\{name_to_save}_tmp-final.ply'):
+    os.remove(f'Python\\tmp\\{name_to_save}_tmp-final.ply')
     print("tmp-final .ply deleted.")
 
 # To get the end time of execution
