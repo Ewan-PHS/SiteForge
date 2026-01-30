@@ -172,9 +172,9 @@ def x3images_to_point_cloud(img01, img02, img03):
 
     generated_point_set = []
 
-    img_1_colours = Counter(img01.getdata())
-    img_2_colours = Counter(img02.getdata())
-    img_3_colours = Counter(img03.getdata())
+    img_1_colours = Counter(img01.get_flattened_data())
+    img_2_colours = Counter(img02.get_flattened_data())
+    img_3_colours = Counter(img03.get_flattened_data())
 
     total_unique_colours = []
 
