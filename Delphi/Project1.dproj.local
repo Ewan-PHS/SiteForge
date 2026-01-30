@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2025/08/15 21:11:24.000.019,=A:\Delphi\Unit1.pas</Transaction>
+    <Transaction>2026/01/30 18:21:16.492,=A:\Delphi\Unit1.pas</Transaction>
+    <Transaction>2026/01/30 18:37:26.880,C:\Users\Admin\OneDrive\Documents\GitHub\SIP-Project-2026\Delphi\Unit1.dfm=A:\Delphi\Unit1.dfm</Transaction>
+    <Transaction>2026/01/30 18:37:26.880,C:\Users\Admin\OneDrive\Documents\GitHub\SIP-Project-2026\Delphi\Unit1.pas=A:\Delphi\Unit1.pas</Transaction>
+    <Transaction>2026/01/30 18:37:30.188,C:\Users\Admin\OneDrive\Documents\GitHub\SIP-Project-2026\Delphi\Project1.dproj=A:\Delphi\Project1.dproj</Transaction>
+  </Transactions>
+</BorlandProject>
