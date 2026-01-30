@@ -316,7 +316,7 @@ root = tk.Tk()  # creates window
 root.title("Image to 3D model")  # window title
 root.geometry("450x350")  # window size
 root.resizable(False, False)  # makes window non-resizable
-root.iconbitmap("SIP Project (Built from AiHackathon)\resources\icons\IMG_to_stl.ico")  # gives the window a custom icon
+# root.iconbitmap("resources\icons\IMG_to_stl.ico")  # gives the window a custom icon
 
 button_img_1 = tk.Button(root, text="Select Image 1, side", command=select_img_1)
 button_img_1.pack(pady=20)
