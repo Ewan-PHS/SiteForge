@@ -2,7 +2,7 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = '<insert fitting name here>'
-  ClientHeight = 494
+  ClientHeight = 518
   ClientWidth = 680
   Color = clBtnFace
   Font.Charset = ANSI_CHARSET
@@ -24,6 +24,20 @@ object Form1: TForm1
     Font.Style = []
     ParentFont = False
   end
+  object lblSavePath: TLabel
+    Left = 8
+    Top = 450
+    Width = 138
+    Height = 23
+    Caption = 'Path to save 3D model'
+  end
+  object lblName: TLabel
+    Left = 161
+    Top = 376
+    Width = 146
+    Height = 23
+    Caption = 'Name to save 3D model'
+  end
   object btnTop: TButton
     Left = 8
     Top = 236
@@ -35,7 +49,7 @@ object Form1: TForm1
   end
   object btnFront: TButton
     Left = 8
-    Top = 430
+    Top = 405
     Width = 121
     Height = 25
     Caption = 'Select a front view'
@@ -79,7 +93,7 @@ object Form1: TForm1
   end
   object btnGenerate: TButton
     Left = 161
-    Top = 359
+    Top = 295
     Width = 153
     Height = 58
     Caption = 'Generate 3D model'
@@ -90,10 +104,11 @@ object Form1: TForm1
     Font.Style = []
     ParentFont = False
     TabOrder = 4
+    OnClick = btnGenerateClick
   end
   object pnlFrontView: TPanel
     Left = 8
-    Top = 304
+    Top = 279
     Width = 121
     Height = 120
     TabOrder = 5
@@ -129,5 +144,19 @@ object Form1: TForm1
       Width = 105
       Height = 105
     end
+  end
+  object Name: TEdit
+    Left = 161
+    Top = 401
+    Width = 153
+    Height = 31
+    TabOrder = 8
+  end
+  object SavePath: TEdit
+    Left = 8
+    Top = 479
+    Width = 306
+    Height = 31
+    TabOrder = 9
   end
 end

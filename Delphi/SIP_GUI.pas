@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.StdCtrls, Vcl.ExtCtrls;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.StdCtrls, Vcl.ExtCtrls, ShellApi;
 
 type
   TForm1 = class(TForm)
@@ -23,9 +23,14 @@ type
     imgTop: TImage;
     imgSide: TImage;
     lblTitle: TLabel;
+    Name: TEdit;
+    SavePath: TEdit;
+    lblSavePath: TLabel;
+    lblName: TLabel;
     procedure btnFrontClick(Sender: TObject);
     procedure btnTopClick(Sender: TObject);
     procedure btnRightClick(Sender: TObject);
+    procedure btnGenerateClick(Sender: TObject);
   private
     var
       sImgPathTopView, sImgPathFrontView, sImgPathRightView : String;
@@ -60,6 +65,13 @@ begin
   finally
     OpenDialog.Free;
   end;
+
+end;
+
+procedure TForm1.btnGenerateClick(Sender: TObject);
+begin
+  // Run an executable with parameters
+  ShellExecute(0, 'open', 'python.exe', 'C:\Not_Onedrive\GitHub\SIP-Project-2026\Python\V3.py 0 C:\Not_Onedrive\GitHub\SIP-Project-2026\Python\Images\square_30x30_filled.png C:\Not_Onedrive\GitHub\SIP-Project-2026\Python\Images\square_30x30_filled.png C:\Not_Onedrive\GitHub\SIP-Project-2026\Python\Images\square_30x30_filled.png test_cmd_003 C:\Users\ewanc\Downloads', nil, SW_SHOWNORMAL);
 
 end;
 
