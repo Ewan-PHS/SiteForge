@@ -22,6 +22,7 @@ import time
 import point_cloud_utils as pcu
 import os
 import meshio
+import argparse
 
 # print(torch.cuda.is_available())
 # print(torch.cuda.get_device_name(0))
@@ -332,58 +333,63 @@ def file_name():
 
 # CODE STARTS HERE:
 
+# Parser to allow for passing arguments when running the .py file
+parser = argparse.ArgumentParser(description="A simple CLI tool.")
+parser.add_argument("opengui", type=bool, default=False, help="Boolean, whether to open built-in the GUI.")
+parser.add_argument("TopViewPath", type=str, help="String, path for top-view image")
+parser.add_argument("FrontViewPath", type=str, help="String, path for front-view image")
+parser.add_argument("RightViewPath", type=str, help="String, path for right-view image")
 
-root = tk.Tk()  # creates window
-root.title("Image to 3D model")  # window title
-root.geometry("450x350")  # window size
-root.resizable(False, False)  # makes window non-resizable
-# root.iconbitmap("resources\icons\IMG_to_stl.ico")  # gives the window a custom icon
+args = parser.parse_args()
 
-button_img_1 = tk.Button(root, text="Select Image 1, side", command=select_img_1)
-button_img_1.pack(pady=20)
+if args.opengui == True:
+    # Opens a tkinter GUI
+    root = tk.Tk()  # creates window
+    root.title("Image to 3D model")  # window title
+    root.geometry("450x350")  # window size
+    root.resizable(False, False)  # makes window non-resizable
+    # root.iconbitmap("resources\icons\IMG_to_stl.ico")  # gives the window a custom icon
 
-button_img_2 = tk.Button(root, text="Select Image 2, top", command=select_img_2)
-button_img_2.pack(pady=0)
+    button_img_1 = tk.Button(root, text="Select Image 1, side", command=select_img_1)
+    button_img_1.pack(pady=20)
 
-button_img_3 = tk.Button(root, text="Select Image 3, front", command=select_img_3)
-button_img_3.pack(pady=20)
+    button_img_2 = tk.Button(root, text="Select Image 2, top", command=select_img_2)
+    button_img_2.pack(pady=0)
 
-# button_generate = tk.Button(root, text="Generate", command=display_point_cloud(im_1, im_2, im_3))
-# button_generate.pack(pady=20)
+    button_img_3 = tk.Button(root, text="Select Image 3, front", command=select_img_3)
+    button_img_3.pack(pady=20)
 
-label = tk.Label(root, text="Path to save .stl file. E.g: C:\\Users\\<EXAMPLENAME>\\Downloads")
-label.pack(pady=0)
+    # button_generate = tk.Button(root, text="Generate", command=display_point_cloud(im_1, im_2, im_3))
+    # button_generate.pack(pady=20)
 
-file_save_path = tk.Entry(root, width=55, borderwidth=2)
-file_save_path.pack(pady=0)
+    label = tk.Label(root, text="Path to save .stl file. E.g: C:\\Users\\<EXAMPLENAME>\\Downloads")
+    label.pack(pady=0)
 
-# save_path = tk.Button(root, text="Save", command=save_file_path)
-# save_path.pack(pady=0)
+    file_save_path = tk.Entry(root, width=55, borderwidth=2)
+    file_save_path.pack(pady=0)
 
-label1 = tk.Label(root, text="""
-Name of .stl file""")
-label1.pack(pady=0)
+    # save_path = tk.Button(root, text="Save", command=save_file_path)
+    # save_path.pack(pady=0)
 
-file_save_name = tk.Entry(root, width=35, borderwidth=2)
-file_save_name.pack(pady=0)
+    label1 = tk.Label(root, text="""
+    Name of .stl file""")
+    label1.pack(pady=0)
 
-# exit_button = tk.Button(root, text="Close and generate", command=threading_for_gen)
-exit_button = tk.Button(root, text="Close and generate", command=save_file_path)
-exit_button.pack(pady=20)
+    file_save_name = tk.Entry(root, width=35, borderwidth=2)
+    file_save_name.pack(pady=0)
 
-root.mainloop()
+    # exit_button = tk.Button(root, text="Close and generate", command=threading_for_gen)
+    exit_button = tk.Button(root, text="Close and generate", command=save_file_path)
+    exit_button.pack(pady=20)
 
-root.destroy()
+    root.mainloop()
 
-# # Open the image file
-# img_1 = Image.open(img_1_path)
-# img_2 = Image.open(img_2_path)
-# img_3 = Image.open(img_3_path)
-#
-# pcd = x3images_to_point_cloud(img_1, img_2, img_3)
-#
-# # Add axis
-# axis = o3d.geometry.TriangleMesh.create_coordinate_frame(size=2, origin=pcd.get_center())
+    root.destroy()
+
+if args.opengui == False:
+    img_1_path = args.RightViewPath
+    img_2_path = args.TopViewPath
+    img_3_path = args.FrontViewPath
 
 # To get start time of execution
 start_time = time.perf_counter()
