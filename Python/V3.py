@@ -335,12 +335,14 @@ def file_name():
 
 # Parser to allow for passing arguments when running the .py file
 parser = argparse.ArgumentParser(description="A simple CLI tool.")
-parser.add_argument("opengui", type=bool, default=False, help="Boolean, whether to open built-in the GUI.")
+parser.add_argument("opengui", type=bool, help="Boolean, whether to open built-in the GUI.")
 parser.add_argument("TopViewPath", type=str, help="String, path for top-view image")
 parser.add_argument("FrontViewPath", type=str, help="String, path for front-view image")
 parser.add_argument("RightViewPath", type=str, help="String, path for right-view image")
 
 args = parser.parse_args()
+
+print(f"{args.opengui} ; {args.TopViewPath} ; {args.FrontViewPath} ; {args.RightViewPath}")
 
 if args.opengui == True:
     # Opens a tkinter GUI
