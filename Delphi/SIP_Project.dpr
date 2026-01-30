@@ -1,8 +1,8 @@
-program Project1;
+program SIP_Project;
 
 uses
   Vcl.Forms,
-  Unit1 in 'Unit1.pas' {Form1};
+  SIP_GUI in 'SIP_GUI.pas' {Form1};
 
 {$R *.res}
 

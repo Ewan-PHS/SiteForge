@@ -1,22 +1,23 @@
-unit Unit1;
+unit SIP_GUI;
 
 interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls;
 
 type
   TForm1 = class(TForm)
-    Button1: TButton;
+    btnTop: TButton;
     Image1: TImage;
-    Button2: TButton;
-    Button3: TButton;
     Image2: TImage;
+    btnFront: TButton;
     Image3: TImage;
+    btnSide: TButton;
+    pnlPreview: TPanel;
     Image4: TImage;
-    Button4: TButton;
-    Button5: TButton;
+    lblPreview: TLabel;
+    btnGenerate: TButton;
   private
     { Private declarations }
   public
