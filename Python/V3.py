@@ -484,12 +484,12 @@ ctr = render.get_view_control()
 bbox = mesh_to_render.get_axis_aligned_bounding_box()
 center = bbox.get_center()
 extent = np.linalg.norm(bbox.get_extent())
-mesh_to_render.scale((1 / extent)*37, center=bbox.get_center())
+mesh_to_render.scale(0.95, center=bbox.get_center())
 
 ctr.set_lookat(center)
-ctr.set_front([-1, -1, -1])     # camera direction
+ctr.set_front([-1, -1, -1])  # camera direction
 ctr.set_up([0, -1, 0])
-ctr.set_zoom(0.7)
+ctr.set_zoom(1)
 
 opt = render.get_render_option()
 opt.background_color = np.array([0, 0, 0])   # black background
