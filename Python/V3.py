@@ -472,18 +472,38 @@ meshio.write((f'{path_to_save}\\{name_to_save}.stl'), output_mesh)
 
 end_save_time = time.perf_counter()
 
-render = o3d.visualization.rendering.OffscreenRenderer(width=321, height=321)
-object_to_render = o3d.io.read_triangle_mesh(f'{path_to_save}\\{name_to_save}.stl')
+render = o3d.visualization.Visualizer()
+render.create_window(width=321, height=321, visible=False) 
 
-render.scene.add_geometry("model", object_to_render, o3d.visualization.rendering.MaterialRecord())
-# Set background colour
-render.scene.set_background([0, 0, 0, 0])
-# Set camera view
-render.scene.camera.look_at([0, 0, 0], [0, 0, 5], [0, 1, 0])
-# Render 3D model
-image = render.render_to_image()
-# Save the rendered image as .png
-o3d.io.write_image(f'{SiteForge_render_dir}\\rendered_{name_to_save}.png', image)
+mesh_to_render = o3d.io.read_triangle_mesh(f'{path_to_save}\\{name_to_save}.stl')
+mesh_to_render.compute_vertex_normals()
+mesh_to_render.compute_triangle_normals()
+render.add_geometry(mesh_to_render)
+
+ctr = render.get_view_control()
+bbox = mesh_to_render.get_axis_aligned_bounding_box()
+center = bbox.get_center()
+extent = np.linalg.norm(bbox.get_extent())
+mesh_to_render.scale((1 / extent)*37, center=bbox.get_center())
+
+ctr.set_lookat(center)
+ctr.set_front([-1, -1, -1])     # camera direction
+ctr.set_up([0, -1, 0])
+ctr.set_zoom(0.7)
+
+opt = render.get_render_option()
+opt.background_color = np.array([0, 0, 0])   # black background
+opt.mesh_show_back_face = True
+opt.light_on = True
+opt.mesh_color_option = o3d.visualization.MeshColorOption.Default
+
+render.poll_events()
+render.update_renderer()
+# render.poll_events()
+# render.update_renderer()
+
+image = render.capture_screen_image(f'{SiteForge_render_dir}\\rendered_{name_to_save}.png', do_render=True)
+render.destroy_window()
 
 end_render_time = time.perf_counter()
 
