@@ -442,6 +442,9 @@ os.makedirs(SiteForge_dir, exist_ok=True)
 SiteForge_tmp_dir = os.path.join(SiteForge_dir, 'temp')
 os.makedirs(SiteForge_tmp_dir, exist_ok=True)
 
+SiteForge_render_dir = os.path.join(SiteForge_dir, 'renders')
+os.makedirs(SiteForge_render_dir, exist_ok=True)
+
 meshlib.mrmeshpy.saveMesh(mesh, (f'{SiteForge_tmp_dir}\\{name_to_save}_tmp.ply'))
 
 v, f = pcu.load_mesh_vf(f'{SiteForge_tmp_dir}\\{name_to_save}_tmp.ply')
@@ -469,11 +472,27 @@ meshio.write((f'{path_to_save}\\{name_to_save}.stl'), output_mesh)
 
 end_save_time = time.perf_counter()
 
+render = o3d.visualization.rendering.OffscreenRenderer(width=321, height=321)
+object_to_render = o3d.io.read_triangle_mesh(f'{path_to_save}\\{name_to_save}.stl')
+
+render.scene.add_geometry("model", object_to_render, o3d.visualization.rendering.MaterialRecord())
+# Set background colour
+render.scene.set_background([0, 0, 0, 0])
+# Set camera view
+render.scene.camera.look_at([0, 0, 0], [0, 0, 5], [0, 1, 0])
+# Render 3D model
+image = render.render_to_image()
+# Save the rendered image as .png
+o3d.io.write_image(f'{SiteForge_render_dir}\\rendered_{name_to_save}.png', image)
+
+end_render_time = time.perf_counter()
+
 print(f"""
 ################################################
 Name: {name_to_save}
 Execution time: {end_time - start_time} seconds
 Save time: {end_save_time - end_time} seconds
+Render time: {end_render_time - end_save_time} seconds
 ################################################
 """)
 
