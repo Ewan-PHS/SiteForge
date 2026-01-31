@@ -433,23 +433,32 @@ points = meshlib.mrmeshnumpy.pointCloudFromPoints(xyz_load)
 # params.radius = 4
 mesh = meshlib.mrmeshpy.triangulatePointCloud(points)#, params)
 
-meshlib.mrmeshpy.saveMesh(mesh, (f'Python\\tmp\\{name_to_save}_tmp.ply'))
+# Getting the path of Appdata/local to store tmp files. Creating folders in Appdata local for the app
+appdata_local = os.getenv('LOCALAPPDATA')
 
-v, f = pcu.load_mesh_vf(f'Python\\tmp\\{name_to_save}_tmp.ply')
+SiteForge_dir = os.path.join(appdata_local, 'SiteForge')
+os.makedirs(SiteForge_dir, exist_ok=True)
 
-if os.path.exists(f'Python\\tmp\\{name_to_save}_tmp.ply'):
-    os.remove(f'Python\\tmp\\{name_to_save}_tmp.ply')
+SiteForge_tmp_dir = os.path.join(SiteForge_dir, 'temp')
+os.makedirs(SiteForge_tmp_dir, exist_ok=True)
+
+meshlib.mrmeshpy.saveMesh(mesh, (f'{SiteForge_tmp_dir}\\{name_to_save}_tmp.ply'))
+
+v, f = pcu.load_mesh_vf(f'{SiteForge_tmp_dir}\\{name_to_save}_tmp.ply')
+
+if os.path.exists(f'{SiteForge_tmp_dir}\\{name_to_save}_tmp.ply'):
+    os.remove(f'{SiteForge_tmp_dir}\\{name_to_save}_tmp.ply')
     print("tmp .ply deleted.")
 
 resolution = 12500
 v_watertight, f_watertight = pcu.make_mesh_watertight(v, f, resolution=resolution)
 
-pcu.save_mesh_vf(v=v_watertight, f=f_watertight, filename=(f'Python\\tmp\\{name_to_save}_tmp-final.ply'))
+pcu.save_mesh_vf(v=v_watertight, f=f_watertight, filename=(f'{SiteForge_tmp_dir}\\{name_to_save}_tmp-final.ply'))
 
-output_mesh = meshio.read(f'Python\\tmp\\{name_to_save}_tmp-final.ply')
+output_mesh = meshio.read(f'{SiteForge_tmp_dir}\\{name_to_save}_tmp-final.ply')
 
-if os.path.exists(f'Python\\tmp\\{name_to_save}_tmp-final.ply'):
-    os.remove(f'Python\\tmp\\{name_to_save}_tmp-final.ply')
+if os.path.exists(f'{SiteForge_tmp_dir}\\{name_to_save}_tmp-final.ply'):
+    os.remove(f'{SiteForge_tmp_dir}\\{name_to_save}_tmp-final.ply')
     print("tmp-final .ply deleted.")
 
 # To get the end time of execution
