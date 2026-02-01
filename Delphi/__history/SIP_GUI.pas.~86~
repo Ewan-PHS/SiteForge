@@ -37,8 +37,9 @@ type
     procedure FormCreate(Sender: TObject);
   private
     var
-      sImgPathTopView, sImgPathFrontView, sImgPathRightView, sSavePath, sAppdataLocalPath : String;
+      sImgPathTopView, sImgPathFrontView, sImgPathRightView, sSavePath, sName, sSiteForgePath : String;
 
+    function OpenImageFileSelect(): String;
     function ShellExecute_AndWait(FileName: string; Params: string): bool;
   public
     { Public declarations }
@@ -50,6 +51,25 @@ var
 implementation
 
 {$R *.dfm}
+
+function TfrmMain.OpenImageFileSelect(): String;
+var
+  OpenDialog: TOpenDialog;
+begin
+  OpenDialog := TOpenDialog.Create(nil);
+  try
+    OpenDialog.Filter := 'Image files|*.png;*.jpg;*.jpeg;*.bmp';
+    OpenDialog.Options := [ofFileMustExist];
+
+    if OpenDialog.Execute then
+    begin
+      Result := OpenDialog.FileName;
+    end;
+  finally
+    OpenDialog.Free;
+  end;
+
+end;
 
 function TfrmMain.ShellExecute_AndWait(FileName: string; Params: string): bool;
 var
@@ -66,7 +86,7 @@ begin
     exInfo.lpVerb := 'open';
     exInfo.lpParameters := PChar(Params);
     lpFile := PChar(FileName);
-    nShow := SW_SHOWNORMAL;
+    nShow := SW_HIDE;
   end;
   if ShellExecuteEx(@exInfo) then
     Ph := exInfo.hProcess
@@ -81,6 +101,45 @@ begin
   CloseHandle(Ph);
 
   Result := true;
+
+end;
+
+procedure TfrmMain.btnRightClick(Sender: TObject);
+var
+  sFilePath: String;
+begin
+  sFilePath := OpenImageFileSelect();
+
+  imgSide.Picture.LoadFromFile(sFilePath);
+  imgSide.Center := True;
+  imgSide.Stretch := True;
+  sImgPathRightView := sFilePath;
+
+end;
+
+procedure TfrmMain.btnTopClick(Sender: TObject);
+var
+  sFilePath: String;
+begin
+  sFilePath := OpenImageFileSelect();
+
+  imgTop.Picture.LoadFromFile(sFilePath);
+  imgTop.Center := True;
+  imgTop.Stretch := True;
+  sImgPathTopView := sFilePath;
+
+end;
+
+procedure TfrmMain.btnFrontClick(Sender: TObject);
+var
+  sFilePath: String;
+begin
+  sFilePath := OpenImageFileSelect();
+
+  imgFront.Picture.LoadFromFile(sFilePath);
+  imgFront.Center := True;
+  imgFront.Stretch := True;
+  sImgPathFrontView := sFilePath;
 
 end;
 
@@ -99,29 +158,6 @@ begin
 
 end;
 
-procedure TfrmMain.btnFrontClick(Sender: TObject);
-var
-  OpenDialog: TOpenDialog;
-begin
-  OpenDialog := TOpenDialog.Create(nil);
-  try
-
-    OpenDialog.Filter := 'Image files|*.png;*.jpg;*.jpeg;*.bmp';
-    OpenDialog.Options := [ofFileMustExist];
-
-    if OpenDialog.Execute then
-    begin
-      imgFront.Picture.LoadFromFile(OpenDialog.FileName);
-      imgFront.Center := True;
-      imgFront.Stretch := True;
-      sImgPathFrontView := OpenDialog.FileName;
-    end;
-  finally
-    OpenDialog.Free;
-  end;
-
-end;
-
 procedure TfrmMain.btnGenerateClick(Sender: TObject);
 var
   sPythonCommand, sRenderedModelPath: String;
@@ -132,82 +168,31 @@ begin
   sPythonCommand := sPythonCommand + ' ' + sImgPathTopView;
   sPythonCommand := sPythonCommand + ' ' + sImgPathFrontView;
   sPythonCommand := sPythonCommand + ' ' + sImgPathRightView;
-  sPythonCommand := sPythonCommand + ' ' + edtName.Text;
+  sPythonCommand := sPythonCommand + ' ' + sName;
   sPythonCommand := sPythonCommand + ' ' + sSavePath;
-  // Run an executable with parameters
-  // ShellExecute(0, 'open', 'python.exe', PWideChar(sPythonCommand), nil, SW_HIDE);
 
-  sRenderedModelPath := '';
+  sRenderedModelPath := sSiteForgePath + '\renders\rendered_' + sName + '.png';
 
-//  if ShellExecute_AndWait('python.exe', sPythonCommand) then
-//    imgPreview3DModel.Picture.LoadFromFile();
-
-end;
-
-procedure TfrmMain.btnRightClick(Sender: TObject);
-var
-  OpenDialog: TOpenDialog;
-begin
-  OpenDialog := TOpenDialog.Create(nil);
-  try
-
-    OpenDialog.Filter := 'Image files|*.png;*.jpg;*.jpeg;*.bmp';
-    OpenDialog.Options := [ofFileMustExist];
-
-    if OpenDialog.Execute then
-    begin
-      imgSide.Picture.LoadFromFile(OpenDialog.FileName);
-      imgSide.Center := True;
-      imgSide.Stretch := True;
-      sImgPathRightView := OpenDialog.FileName;
-    end;
-  finally
-    OpenDialog.Free;
-  end;
-
-end;
-
-procedure TfrmMain.btnTopClick(Sender: TObject);
-var
-  OpenDialog: TOpenDialog;
-begin
-  OpenDialog := TOpenDialog.Create(nil);
-  try
-
-    OpenDialog.Filter := 'Image files|*.png;*.jpg;*.jpeg;*.bmp';
-    OpenDialog.Options := [ofFileMustExist];
-
-    if OpenDialog.Execute then
-    begin
-      imgTop.Picture.LoadFromFile(OpenDialog.FileName);
-      imgTop.Center := True;
-      imgTop.Stretch := True;
-      sImgPathTopView := OpenDialog.FileName;
-    end;
-  finally
-    OpenDialog.Free;
-  end;
+  if ShellExecute_AndWait('python.exe', sPythonCommand) then
+    imgPreview3DModel.Picture.LoadFromFile(sRenderedModelPath);
 
 end;
 
 procedure TfrmMain.FormCreate(Sender: TObject);
 begin
-  sAppdataLocalPath := TPath.GetHomePath;
-  Delete(sAppdataLocalPath, Length(sAppdataLocalPath) - 6, 7);
-  sAppdataLocalPath := sAppdataLocalPath + 'Local\SiteForge';
-  ShowMessage(sAppdataLocalPath)
+  sSiteForgePath := TPath.GetHomePath;
+  Delete(sSiteForgePath, Length(sSiteForgePath) - 6, 7);
+  sSiteForgePath := sSiteForgePath + 'Local\SiteForge';
 end;
 
 procedure TfrmMain.tmr10msTimer(Sender: TObject);
 begin
+  sName := edtName.Text;
+
   if (sImgPathRightView <> '') and (sImgPathTopView <> '') and (sImgPathFrontView <> '') and (sSavePath <> '') and (edtName.Text <> '') then
-  begin
-    btnGenerate.Enabled := True;
-  end
+    btnGenerate.Enabled := True
   else
-  begin
     btnGenerate.Enabled := False;
-  end;
 
 end;
 

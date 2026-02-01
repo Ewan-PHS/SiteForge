@@ -1,8 +1,8 @@
-object Form1: TForm1
+object frmMain: TfrmMain
   Left = 0
   Top = 0
   Caption = 'SiteForge'
-  ClientHeight = 518
+  ClientHeight = 494
   ClientWidth = 680
   Color = clBtnFace
   Font.Charset = ANSI_CHARSET
@@ -10,30 +10,24 @@ object Form1: TForm1
   Font.Height = -16
   Font.Name = 'Sitka Banner'
   Font.Style = []
+  OnCreate = FormCreate
   TextHeight = 23
   object lblTitle: TLabel
     Left = 136
     Top = 8
-    Width = 228
+    Width = 256
     Height = 92
     Caption = 'SiteForge'
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -64
-    Font.Name = 'Sitka Banner'
-    Font.Style = []
+    Font.Name = 'Sitka Heading Semibold'
+    Font.Style = [fsBold, fsItalic]
     ParentFont = False
   end
-  object lblSavePath: TLabel
-    Left = 8
-    Top = 450
-    Width = 138
-    Height = 23
-    Caption = 'Path to save 3D model'
-  end
   object lblName: TLabel
-    Left = 161
-    Top = 376
+    Left = 167
+    Top = 279
     Width = 146
     Height = 23
     Caption = 'Name to save 3D model'
@@ -71,7 +65,7 @@ object Form1: TForm1
     Width = 337
     Height = 376
     TabOrder = 3
-    object Image4: TImage
+    object imgPreview3DModel: TImage
       Left = 8
       Top = 48
       Width = 321
@@ -92,10 +86,10 @@ object Form1: TForm1
     end
   end
   object btnGenerate: TButton
-    Left = 161
-    Top = 295
-    Width = 153
-    Height = 58
+    Left = 8
+    Top = 446
+    Width = 305
+    Height = 40
     Caption = 'Generate 3D model'
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
@@ -145,18 +139,26 @@ object Form1: TForm1
       Height = 105
     end
   end
-  object Name: TEdit
-    Left = 161
-    Top = 401
-    Width = 153
+  object edtName: TEdit
+    Left = 160
+    Top = 304
+    Width = 160
     Height = 31
     TabOrder = 8
   end
-  object SavePath: TEdit
-    Left = 8
-    Top = 479
-    Width = 306
-    Height = 31
+  object bntSelectPath: TButton
+    Left = 177
+    Top = 360
+    Width = 121
+    Height = 32
+    Caption = 'Select Save Path'
     TabOrder = 9
+    OnClick = bntSelectPathClick
+  end
+  object tmr10ms: TTimer
+    Interval = 10
+    OnTimer = tmr10msTimer
+    Left = 632
+    Top = 16
   end
 end
