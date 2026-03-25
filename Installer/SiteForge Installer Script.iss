@@ -50,10 +50,7 @@ Name: "{app}\bin"; Flags: uninsalwaysuninstall
 
 [Files]
 Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Delphi\Win64\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Python\requirements.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Python\V3.py"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Installer\Install_Requirements.bat"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Installer\python-3.12.3-amd64_Installer.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Python\dist\V3\*"; DestDir: "{app}\bin"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
@@ -61,10 +58,6 @@ Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\python-3.12.3-amd64_Installer.exe"; Parameters: " /quiet InstallAllUsers=1 PrependPath=1 Include_test=0"; Flags: postinstall hidewizard 
-
-Filename: "cmd.exe"; Parameters: "/K ""{app}\Install_Requirements.bat"" ""{app}"""; Flags: postinstall hidewizard
-
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 
