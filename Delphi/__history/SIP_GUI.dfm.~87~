@@ -42,7 +42,7 @@ object frmMain: TfrmMain
     Top = 0
     Width = 638
     Height = 584
-    ActivePage = tabModelGen
+    ActivePage = tabSlicing
     Align = alClient
     TabOrder = 0
     object tabModelGen: TTabSheet

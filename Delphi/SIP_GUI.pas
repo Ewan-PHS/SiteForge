@@ -110,7 +110,7 @@ type
     procedure redtSavePathDisplayChange(Sender: TObject);
   private
     var
-      sImgPathTopView, sImgPathFrontView, sImgPathRightView, sSavePath, sName, sSiteForgePath, sUserPath : String;
+      sImgPathTopView, sImgPathFrontView, sImgPathRightView, sSavePath, sName, sSiteForgePath, sUserPath, sInstalledPath : String;
 
     function OpenImageFileSelect(sTitle : String): String;
     function ShellExecute_AndWait(FileName: string; Params: string): bool;
@@ -259,7 +259,7 @@ var
   SEInfo: TShellExecuteInfo;
   ExitCode: DWORD;
 begin
-  sPythonCommand := 'C:\Not_Onedrive\GitHub\SIP-Project-2026\Python\V3.py 0';
+  sPythonCommand := sInstalledPath + '\bin\V3\V3.exe 0';
   sPythonCommand := sPythonCommand + ' ' + sImgPathTopView;
   sPythonCommand := sPythonCommand + ' ' + sImgPathFrontView;
   sPythonCommand := sPythonCommand + ' ' + sImgPathRightView;
@@ -278,6 +278,8 @@ begin
   sSiteForgePath := TPath.Combine(GetEnvironmentVariable('LOCALAPPDATA'), 'SiteForge');
 
   sUserPath := TPath.GetDownloadsPath;
+
+  sInstalledPath := TPath.GetAppPath;
 
   redtSavePathDisplay.Text := '';
 

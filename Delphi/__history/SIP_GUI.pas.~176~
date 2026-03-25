@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.StdCtrls, Vcl.ExtCtrls,
-  ShellApi, FileCtrl, System.IOUtils, Vcl.Skia, System.Skia, Vcl.ComCtrls,
+  ShellApi, FileCtrl, System.IOUtils, Vcl.ComCtrls,
   Vcl.NumberBox;
 
 type
@@ -110,7 +110,7 @@ type
     procedure redtSavePathDisplayChange(Sender: TObject);
   private
     var
-      sImgPathTopView, sImgPathFrontView, sImgPathRightView, sSavePath, sName, sSiteForgePath, sUserPath : String;
+      sImgPathTopView, sImgPathFrontView, sImgPathRightView, sSavePath, sName, sSiteForgePath, sUserPath, sInstalledPath : String;
 
     function OpenImageFileSelect(sTitle : String): String;
     function ShellExecute_AndWait(FileName: string; Params: string): bool;
@@ -259,7 +259,7 @@ var
   SEInfo: TShellExecuteInfo;
   ExitCode: DWORD;
 begin
-  sPythonCommand := 'C:\Not_Onedrive\GitHub\SIP-Project-2026\Python\V3.py 0';
+  sPythonCommand := sInstalledPath + '\bin\V3.exe 0';
   sPythonCommand := sPythonCommand + ' ' + sImgPathTopView;
   sPythonCommand := sPythonCommand + ' ' + sImgPathFrontView;
   sPythonCommand := sPythonCommand + ' ' + sImgPathRightView;
@@ -275,18 +275,11 @@ end;
 
 procedure TfrmMain.FormCreate(Sender: TObject);
 begin
-  ShowMessage('FormCreate works');
+  sSiteForgePath := TPath.Combine(GetEnvironmentVariable('LOCALAPPDATA'), 'SiteForge');
 
-  sSiteForgePath := TPath.GetHomePath;
-  if Length(sSiteForgePath) > 6 then
-    Delete(sSiteForgePath, Length(sSiteForgePath) - 6, 7);
-  sSiteForgePath := sSiteForgePath + 'Local\SiteForge';
+  sUserPath := TPath.GetDownloadsPath;
 
-  if Length(sSiteForgePath) > 22 then
-    Delete(sSiteForgePath, Length(sSiteForgePath) - 22, 23);
-  sUserPath := sSiteForgePath;
-
-  sUserPath := sUserPath + 'Downloads';
+  sInstalledPath := TPath.GetAppPath;
 
   redtSavePathDisplay.Text := '';
 
