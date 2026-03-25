@@ -5,10 +5,10 @@ import sys
 from ast import arg
 
 from PIL import Image
-import meshlib.mrcudapy
+# import meshlib.mrcudapy
 import meshlib.mrmeshnumpy
 import meshlib.mrmeshpy
-import meshlib.mrviewerpy
+# import meshlib.mrviewerpy
 import open3d as o3d
 import numpy as np
 import pyvista as pv
@@ -20,7 +20,6 @@ tk.Tk().withdraw()  # part of the import, goes at end
 from threading import *
 from collections import defaultdict
 from collections import Counter
-import cv2
 import torch
 import meshlib
 import time
