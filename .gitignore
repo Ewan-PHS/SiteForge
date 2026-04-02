@@ -1,1 +1,3 @@
 Installer/SiteForge Installer.exe
+*.pyd
+*.dll
