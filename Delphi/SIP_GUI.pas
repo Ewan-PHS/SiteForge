@@ -255,20 +255,22 @@ end;
 
 procedure TfrmMain.btnGenerateClick(Sender: TObject);
 var
-  sPythonCommand, sRenderedModelPath: String;
+  sPythonRunArgs, sPythonExecutable, sRenderedModelPath: String;
   SEInfo: TShellExecuteInfo;
   ExitCode: DWORD;
 begin
-  sPythonCommand := sInstalledPath + '\bin\V3\V3.exe 0';
-  sPythonCommand := sPythonCommand + ' ' + sImgPathTopView;
-  sPythonCommand := sPythonCommand + ' ' + sImgPathFrontView;
-  sPythonCommand := sPythonCommand + ' ' + sImgPathRightView;
-  sPythonCommand := sPythonCommand + ' ' + sName;
-  sPythonCommand := sPythonCommand + ' ' + sSavePath;
+  sPythonRunArgs := '0';
+  sPythonRunArgs := sPythonRunArgs + ' -TopViewPath ' + sImgPathTopView;
+  sPythonRunArgs := sPythonRunArgs + ' -FrontViewPath ' + sImgPathFrontView;
+  sPythonRunArgs := sPythonRunArgs + ' -RightViewPath ' + sImgPathRightView;
+  sPythonRunArgs := sPythonRunArgs + ' -Name ' + sName;
+  sPythonRunArgs := sPythonRunArgs + ' -SavePath ' + sSavePath;
 
   sRenderedModelPath := sSiteForgePath + '\renders\rendered_' + sName + '.png';
 
-  if ShellExecute_AndWait('python.exe', sPythonCommand) then
+  sPythonExecutable := '"' + sInstalledPath + '\bin\V3.exe"';
+
+  if ShellExecute_AndWait(sPythonExecutable, sPythonRunArgs) then
     imgPreview3DModel.Picture.LoadFromFile(sRenderedModelPath);
 
 end;
