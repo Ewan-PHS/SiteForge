@@ -51,6 +51,7 @@ Name: "{app}\bin"; Flags: uninsalwaysuninstall
 [Files]
 Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Delphi\Win64\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Python\dist\V3\*"; DestDir: "{app}\bin"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Installer\vc_redist.x64.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
@@ -58,6 +59,7 @@ Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
+Filename: "{app}\bin\vc_redist.x64.exe"; Description: "{cm:LaunchProgram,{#StringChange('Install Visual C++ Redistributable', '&', '&&')}}"; Flags: postinstall
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 
