@@ -4,6 +4,8 @@ import sys
 
 from ast import arg
 
+from pyperclip import is_available
+
 from PIL import Image
 # import meshlib.mrcudapy
 import meshlib.mrmeshnumpy
@@ -34,7 +36,11 @@ import argparse
 # Much faster as is run on the GPU
 
 def pixel_iterating_gpu(width1, height1, pixels1, width2, height2, pixels2, width3, height3, pixels3, r, g, b):
-    device = torch.device("cuda")
+
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
 
     color = torch.tensor([r, g, b], device=device)
 
