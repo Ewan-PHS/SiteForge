@@ -1,3 +1,5 @@
 Installer/SiteForge Installer.exe
 *.pyd
 *.dll
+/Python/build
+Python/V3.spec
