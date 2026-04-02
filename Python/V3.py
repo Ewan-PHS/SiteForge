@@ -358,8 +358,10 @@ xyz_load = np.asarray(pcd_load).astype(float)
 
 # Checks where to get the name and path from, depending on the enabled/disabled state of the GUI
 if args.opengui == 1:
-    path_to_save = file_path()
-    path_to_save = "C:\\Users\\ewanc\\Downloads"   # to save me from typing it out every time
+    if file_path() == "":
+        path_to_save = "C:\\Users\\ewanc\\Downloads"   # to save me from typing it out every time
+    else:
+        path_to_save = file_path()
     name_to_save = file_name()
 
 if args.opengui == 0:
@@ -427,6 +429,8 @@ meshio.write((f'{path_to_save}\\{name_to_save}.stl'), output_mesh)
 end_save_time = time.perf_counter()
 
 # Setup the rendering window
+os.environ["OPEN3D_CPU_RENDERING"] = "true"
+
 render = o3d.visualization.Visualizer()
 render.create_window(width=321, height=321, visible=False) 
 
