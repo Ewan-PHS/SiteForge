@@ -29,6 +29,7 @@ import point_cloud_utils as pcu
 import os
 import meshio
 import argparse
+import json
 
 
 ################################################################################################################
@@ -157,7 +158,7 @@ def x3images_to_point_cloud(img01, img02, img03):
 
     # Keep the size of the images used to display as data at the end
     global Image_Size 
-    Image_Size = f"{width_1} x {height_1}"
+    Image_Size = width_1
 
     # Get the pixel data, e.g. (R, G, B)
     img_1_colours = Counter(img01.get_flattened_data())
@@ -391,6 +392,12 @@ os.makedirs(SiteForge_tmp_dir, exist_ok=True)
 SiteForge_render_dir = os.path.join(SiteForge_dir, 'renders')
 os.makedirs(SiteForge_render_dir, exist_ok=True)
 
+SiteForge_stlBackup_dir = os.path.join(SiteForge_dir, 'stl-backups')
+os.makedirs(SiteForge_stlBackup_dir, exist_ok=True)
+
+SiteForge_modelData_dir = os.path.join(SiteForge_dir, 'dat')
+os.makedirs(SiteForge_modelData_dir, exist_ok=True)
+
 # Temporarliy saving the mesh a .ply
 meshlib.mrmeshpy.saveMesh(mesh, (f'{SiteForge_tmp_dir}\\{name_to_save}_tmp.ply'))
 
@@ -424,6 +431,9 @@ end_time = time.perf_counter()
 
 # Save the resulting mesh as a .stl
 meshio.write((f'{path_to_save}\\{name_to_save}.stl'), output_mesh)
+
+# Save a backup of the stl to a seperate directory
+meshio.write((f'{SiteForge_stlBackup_dir}\\{name_to_save}.stl'), output_mesh)
 
 # Get the time of save
 end_save_time = time.perf_counter()
@@ -471,15 +481,32 @@ render.destroy_window()
 # Get time of the render ending
 end_render_time = time.perf_counter()
 
+# Simplifiying names of commonly used variables
+generation_time = end_time - start_time
+save_time = end_save_time - end_time
+render_time = end_render_time - end_save_time
+
+# Creating a JSON file to store data about each 3D model that is generated
+jsonData = {
+    "name": f"{name_to_save}",
+    "image_size": f"{Image_Size}",
+    "generation_time": f"{generation_time}",
+    "save_time": f"{save_time}",
+    "render_time": f"{render_time}"
+}
+
+with open(f"{SiteForge_modelData_dir}\\{name_to_save}_dat.json", "w") as json_file:
+    json.dump(jsonData, json_file, indent=4)
+
 if args.opengui == 1:
     # Printing telementry data for testing
     print(f"""
     ################################################
     Name: {name_to_save}
-    Image Size: {Image_Size} pixels
-    Execution time: {end_time - start_time} seconds
-    Save time: {end_save_time - end_time} seconds
-    Render time: {end_render_time - end_save_time} seconds
+    Image Size: {Image_Size} x {Image_Size} pixels
+    Generation time: {generation_time} seconds
+    Save time: {save_time} seconds
+    Render time: {render_time} seconds
     ################################################
     """)
 
