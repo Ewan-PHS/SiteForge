@@ -4102,13 +4102,6 @@ object frmMain: TfrmMain
         Height = 23
         Caption = 'Save Path:'
       end
-      object lblGcodeName: TLabel
-        Left = 187
-        Top = 195
-        Width = 115
-        Height = 23
-        Caption = 'Gcode Save Name:'
-      end
       object btnSliceExport: TButton
         Left = 40
         Top = 432
@@ -4137,13 +4130,6 @@ object frmMain: TfrmMain
         Caption = 'Select Save Path'
         TabOrder = 2
         OnClick = btnGcodeSelectSavePathClick
-      end
-      object edtGcodeName: TEdit
-        Left = 187
-        Top = 224
-        Width = 254
-        Height = 31
-        TabOrder = 3
       end
     end
     object tabSettings: TTabSheet

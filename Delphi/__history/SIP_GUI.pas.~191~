@@ -1,4 +1,4 @@
-﻿unit SIP_GUI;
+unit SIP_GUI;
 
 interface
 
@@ -100,6 +100,10 @@ type
     lblPrinterGcodeAfterLayerChange: TLabel;
     imgNameplate_Model: TImage;
     imgNameplate_Slicer: TImage;
+    btnSliceExport: TButton;
+    lblGcodeSavePath: TLabel;
+    redtGcodeSavePathDisplay: TRichEdit;
+    btnGcodeSelectSavePath: TButton;
     procedure btnFrontClick(Sender: TObject);
     procedure btnTopClick(Sender: TObject);
     procedure btnRightClick(Sender: TObject);
@@ -108,6 +112,7 @@ type
     procedure tmr10msTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure redtSavePathDisplayChange(Sender: TObject);
+    procedure btnGcodeSelectSavePathClick(Sender: TObject);
   private
     var
       sImgPathTopView, sImgPathFrontView, sImgPathRightView, sSavePath, sName, sSiteForgePath, sUserPath, sInstalledPath : String;
@@ -253,22 +258,45 @@ begin
 
 end;
 
+procedure TfrmMain.btnGcodeSelectSavePathClick(Sender: TObject);
+var
+  FileOpenDialog: TFileOpenDialog;
+begin
+  FileOpenDialog := TFileOpenDialog.Create(nil);
+  try
+    FileOpenDialog.Options := [fdoPickFolders, fdoPathMustExist];
+    FileOpenDialog.Title := 'Select a Folder';
+    FileOpenDialog.DefaultFolder := sUserPath;
+
+    if FileOpenDialog.Execute then
+    begin
+      sSavePath := FileOpenDialog.FileName;
+      redtGcodeSavePathDisplay.Text := sSavePath;
+    end;
+  finally
+    FileOpenDialog.Free;
+  end;
+
+end;
+
 procedure TfrmMain.btnGenerateClick(Sender: TObject);
 var
-  sPythonCommand, sRenderedModelPath: String;
+  sPythonRunArgs, sPythonExecutable, sRenderedModelPath: String;
   SEInfo: TShellExecuteInfo;
   ExitCode: DWORD;
 begin
-  sPythonCommand := '0';
-  sPythonCommand := sPythonCommand + ' ' + sImgPathTopView;
-  sPythonCommand := sPythonCommand + ' ' + sImgPathFrontView;
-  sPythonCommand := sPythonCommand + ' ' + sImgPathRightView;
-  sPythonCommand := sPythonCommand + ' ' + sName;
-  sPythonCommand := sPythonCommand + ' ' + sSavePath;
+  sPythonRunArgs := '0';
+  sPythonRunArgs := sPythonRunArgs + ' -TopViewPath ' + sImgPathTopView;
+  sPythonRunArgs := sPythonRunArgs + ' -FrontViewPath ' + sImgPathFrontView;
+  sPythonRunArgs := sPythonRunArgs + ' -RightViewPath ' + sImgPathRightView;
+  sPythonRunArgs := sPythonRunArgs + ' -Name ' + sName;
+  sPythonRunArgs := sPythonRunArgs + ' -SavePath ' + sSavePath;
 
   sRenderedModelPath := sSiteForgePath + '\renders\rendered_' + sName + '.png';
 
-  if ShellExecute_AndWait(sInstalledPath + '\bin\V3.exe', sPythonCommand) then
+  sPythonExecutable := '"' + sInstalledPath + '\bin\V3.exe"';
+
+  if ShellExecute_AndWait(sPythonExecutable, sPythonRunArgs) then
     imgPreview3DModel.Picture.LoadFromFile(sRenderedModelPath);
 
 end;

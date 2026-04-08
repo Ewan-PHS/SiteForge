@@ -100,6 +100,12 @@ type
     lblPrinterGcodeAfterLayerChange: TLabel;
     imgNameplate_Model: TImage;
     imgNameplate_Slicer: TImage;
+    btnSliceExport: TButton;
+    lblGcodeSavePath: TLabel;
+    redtGcodeSavePathDisplay: TRichEdit;
+    btnGcodeSelectSavePath: TButton;
+    edtGcodeName: TEdit;
+    lblGcodeName: TLabel;
     procedure btnFrontClick(Sender: TObject);
     procedure btnTopClick(Sender: TObject);
     procedure btnRightClick(Sender: TObject);
@@ -108,6 +114,7 @@ type
     procedure tmr10msTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure redtSavePathDisplayChange(Sender: TObject);
+    procedure btnGcodeSelectSavePathClick(Sender: TObject);
   private
     var
       sImgPathTopView, sImgPathFrontView, sImgPathRightView, sSavePath, sName, sSiteForgePath, sUserPath, sInstalledPath : String;
@@ -246,6 +253,27 @@ begin
     begin
       sSavePath := FileOpenDialog.FileName;
       redtSavePathDisplay.Text := sSavePath;
+    end;
+  finally
+    FileOpenDialog.Free;
+  end;
+
+end;
+
+procedure TfrmMain.btnGcodeSelectSavePathClick(Sender: TObject);
+var
+  FileOpenDialog: TFileOpenDialog;
+begin
+  FileOpenDialog := TFileOpenDialog.Create(nil);
+  try
+    FileOpenDialog.Options := [fdoPickFolders, fdoPathMustExist];
+    FileOpenDialog.Title := 'Select a Folder';
+    FileOpenDialog.DefaultFolder := sUserPath;
+
+    if FileOpenDialog.Execute then
+    begin
+      sSavePath := FileOpenDialog.FileName;
+      redtGcodeSavePathDisplay.Text := sSavePath;
     end;
   finally
     FileOpenDialog.Free;
