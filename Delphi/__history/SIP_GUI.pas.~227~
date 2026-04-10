@@ -51,7 +51,7 @@ type
     tabCustomGcode: TTabSheet;
     pgctrlMaterialSettings: TPageControl;
     tabGeneralMaterial: TTabSheet;
-    TabSheet2: TTabSheet;
+    tabAdvancedMaterial: TTabSheet;
     pnlBedDimentions: TPanel;
     nobxBedShapeX: TNumberBox;
     nobxBedShapeY: TNumberBox;
@@ -104,6 +104,12 @@ type
     lblGcodeSavePath: TLabel;
     redtGcodeSavePathDisplay: TRichEdit;
     btnGcodeSelectSavePath: TButton;
+    Label4: TLabel;
+    Label5: TLabel;
+    pnlNozzelTemp: TPanel;
+    lblNozzelTempCaption: TLabel;
+    lblNozzelTempMeasurments: TLabel;
+    nobxNozzelTemp: TNumberBox;
     procedure btnFrontClick(Sender: TObject);
     procedure btnTopClick(Sender: TObject);
     procedure btnRightClick(Sender: TObject);
@@ -113,12 +119,14 @@ type
     procedure FormCreate(Sender: TObject);
     procedure redtSavePathDisplayChange(Sender: TObject);
     procedure btnGcodeSelectSavePathClick(Sender: TObject);
+    procedure btnSliceExportClick(Sender: TObject);
+    procedure redtGcodeSavePathDisplayChange(Sender: TObject);
   private
     var
       sImgPathTopView, sImgPathFrontView, sImgPathRightView, sSavePath, sName, sSiteForgePath, sUserPath, sInstalledPath : String;
-
+      sGcodeSavePath : String;
     function OpenImageFileSelect(sTitle : String): String;
-    function ShellExecute_AndWait(FileName: string; Params: string): bool;
+    function ShellExecuteAndWait(FileName: string; Params: string): bool;
   public
     { Public declarations }
   end;
@@ -150,13 +158,19 @@ begin
 
 end;
 
+procedure TfrmMain.redtGcodeSavePathDisplayChange(Sender: TObject);
+begin
+  if redtGcodeSavePathDisplay.Text <> '' then
+    sGcodeSavePath := redtGcodeSavePathDisplay.Text;
+end;
+
 procedure TfrmMain.redtSavePathDisplayChange(Sender: TObject);
 begin
   if redtSavePathDisplay.Text <> '' then
     sSavePath := redtSavePathDisplay.Text;
 end;
 
-function TfrmMain.ShellExecute_AndWait(FileName: string; Params: string): bool;
+function TfrmMain.ShellExecuteAndWait(FileName: string; Params: string): bool;
 var
   exInfo: TShellExecuteInfo;
   Ph: DWORD;
@@ -202,6 +216,26 @@ begin
   imgSide.Center := True;
   imgSide.Stretch := True;
   sImgPathRightView := sFilePath;
+
+end;
+
+procedure TfrmMain.btnSliceExportClick(Sender: TObject);
+var
+  sSlicerRunArgs, sSlicerExecutable: String;
+  SEInfo: TShellExecuteInfo;
+begin
+  sSlicerRunArgs := '--no-gui';
+  sSlicerRunArgs := sSlicerRunArgs + ' --output "' + sGcodeSavePath + '"';
+  sSlicerRunArgs := sSlicerRunArgs + ' --scale 0.9302325581';
+  sSlicerRunArgs := sSlicerRunArgs + ' --load "' + sInstalledPath + '\bin\slic3r\config.ini"';
+  sSlicerRunArgs := sSlicerRunArgs + ' "' + sSiteForgePath + '\stl-backups\' + sName + '.stl"';
+
+  sSlicerExecutable := '"' + sInstalledPath + '\bin\slic3r\Slic3r-debug-console.exe"';
+
+  if ShellExecuteAndWait(sSlicerExecutable, sSlicerRunArgs) then
+    ShowMessage('Your 3D model has been sliced successfully.')
+  else
+    ShowMessage('There was an error when slicing your 3D model.')
 
 end;
 
@@ -283,7 +317,6 @@ procedure TfrmMain.btnGenerateClick(Sender: TObject);
 var
   sPythonRunArgs, sPythonExecutable, sRenderedModelPath: String;
   SEInfo: TShellExecuteInfo;
-  ExitCode: DWORD;
 begin
   sPythonRunArgs := '0';
   sPythonRunArgs := sPythonRunArgs + ' -TopViewPath ' + sImgPathTopView;
@@ -294,9 +327,9 @@ begin
 
   sRenderedModelPath := sSiteForgePath + '\renders\rendered_' + sName + '.png';
 
-  sPythonExecutable := '"' + sInstalledPath + '\bin\V3.exe"';
+  sPythonExecutable := '"' + sInstalledPath + '\bin\python\V3.exe"';
 
-  if ShellExecute_AndWait(sPythonExecutable, sPythonRunArgs) then
+  if ShellExecuteAndWait(sPythonExecutable, sPythonRunArgs) then
     imgPreview3DModel.Picture.LoadFromFile(sRenderedModelPath);
 
 end;

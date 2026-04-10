@@ -4095,6 +4095,43 @@ object frmMain: TfrmMain
         Proportional = True
         Stretch = True
       end
+      object lblGcodeSavePath: TLabel
+        Left = 243
+        Top = 289
+        Width = 65
+        Height = 23
+        Caption = 'Save Path:'
+      end
+      object btnSliceExport: TButton
+        Left = 40
+        Top = 432
+        Width = 297
+        Height = 41
+        Caption = 'Slice and Export'
+        TabOrder = 0
+        OnClick = btnSliceExportClick
+      end
+      object redtGcodeSavePathDisplay: TRichEdit
+        Left = 243
+        Top = 318
+        Width = 121
+        Height = 48
+        Lines.Strings = (
+          'redtSavePathDisplay')
+        ScrollBars = ssHorizontal
+        TabOrder = 1
+        WordWrap = False
+        OnChange = redtGcodeSavePathDisplayChange
+      end
+      object btnGcodeSelectSavePath: TButton
+        Left = 243
+        Top = 372
+        Width = 121
+        Height = 37
+        Caption = 'Select Save Path'
+        TabOrder = 2
+        OnClick = btnGcodeSelectSavePathClick
+      end
     end
     object tabSettings: TTabSheet
       Caption = 'Settings'
@@ -4104,7 +4141,7 @@ object frmMain: TfrmMain
         Top = 0
         Width = 630
         Height = 546
-        ActivePage = tabPrinterSettings
+        ActivePage = tabMaterialSettings
         Align = alClient
         TabOrder = 0
         object tabPrintSettings: TTabSheet
@@ -4129,6 +4166,13 @@ object frmMain: TfrmMain
             object tabAdvanced: TTabSheet
               Caption = 'Advanced'
               ImageIndex = 2
+              object Label4: TLabel
+                Left = 3
+                Top = -4
+                Width = 127
+                Height = 23
+                Caption = 'PLANNED FEATURE'
+              end
             end
           end
         end
@@ -4140,17 +4184,53 @@ object frmMain: TfrmMain
             Top = 0
             Width = 622
             Height = 508
-            ActivePage = tabGeneralMaterial
+            ActivePage = tabAdvancedMaterial
             Align = alClient
             MultiLine = True
             TabOrder = 0
             TabPosition = tpLeft
             object tabGeneralMaterial: TTabSheet
               Caption = 'General'
+              object pnlNozzelTemp: TPanel
+                Left = 0
+                Top = 0
+                Width = 158
+                Height = 81
+                TabOrder = 0
+                object lblNozzelTempCaption: TLabel
+                  Left = 8
+                  Top = 8
+                  Width = 79
+                  Height = 23
+                  Alignment = taCenter
+                  Caption = 'Nozzel Temp'
+                end
+                object lblNozzelTempMeasurments: TLabel
+                  Left = 136
+                  Top = 40
+                  Width = 15
+                  Height = 23
+                  Caption = #176'C'
+                end
+                object nobxNozzelTemp: TNumberBox
+                  Left = 8
+                  Top = 37
+                  Width = 121
+                  Height = 31
+                  TabOrder = 0
+                end
+              end
             end
-            object TabSheet2: TTabSheet
-              Caption = 'TabSheet2'
+            object tabAdvancedMaterial: TTabSheet
+              Caption = 'Advanced'
               ImageIndex = 1
+              object Label5: TLabel
+                Left = 3
+                Top = -4
+                Width = 127
+                Height = 23
+                Caption = 'PLANNED FEATURE'
+              end
             end
           end
         end
@@ -4162,7 +4242,7 @@ object frmMain: TfrmMain
             Top = 0
             Width = 622
             Height = 508
-            ActivePage = tabCustomGcode
+            ActivePage = tabGeneralPrinter
             Align = alClient
             MultiLine = True
             TabOrder = 0
