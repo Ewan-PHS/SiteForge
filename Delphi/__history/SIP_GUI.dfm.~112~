@@ -45,6 +45,7 @@ object frmMain: TfrmMain
     ActivePage = tabSettings
     Align = alClient
     TabOrder = 0
+    OnChange = pgctrlMainChange
     object tabModelGen: TTabSheet
       Caption = 'Model generation'
       object lblName: TLabel
@@ -4184,7 +4185,7 @@ object frmMain: TfrmMain
             Top = 0
             Width = 622
             Height = 508
-            ActivePage = tabAdvancedMaterial
+            ActivePage = tabGeneralMaterial
             Align = alClient
             MultiLine = True
             TabOrder = 0
@@ -4572,6 +4573,15 @@ object frmMain: TfrmMain
             end
           end
         end
+      end
+      object btnSaveSettings: TButton
+        Left = 504
+        Top = 0
+        Width = 123
+        Height = 28
+        Caption = 'Save Settings'
+        TabOrder = 1
+        OnClick = btnSaveSettingsClick
       end
     end
   end

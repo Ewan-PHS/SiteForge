@@ -1,13 +1,13 @@
-﻿unit SIP_GUI;
+unit SIP_GUI;
 
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
-  System.Classes, Vcl.Graphics,
+  Winapi.Windows, Winapi.Messages,
+  System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, System.IniFiles, System.IOUtils,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.StdCtrls, Vcl.ExtCtrls,
-  ShellApi, FileCtrl, System.IOUtils, Vcl.ComCtrls,
-  Vcl.NumberBox;
+  Vcl.ComCtrls, Vcl.NumberBox,
+  ShellApi, FileCtrl, Vcl.Buttons, System.ImageList, Vcl.ImgList;
 
 type
   TfrmMain = class(TForm)
@@ -51,7 +51,7 @@ type
     tabCustomGcode: TTabSheet;
     pgctrlMaterialSettings: TPageControl;
     tabGeneralMaterial: TTabSheet;
-    TabSheet2: TTabSheet;
+    tabAdvancedMaterial: TTabSheet;
     pnlBedDimentions: TPanel;
     nobxBedShapeX: TNumberBox;
     nobxBedShapeY: TNumberBox;
@@ -104,8 +104,14 @@ type
     lblGcodeSavePath: TLabel;
     redtGcodeSavePathDisplay: TRichEdit;
     btnGcodeSelectSavePath: TButton;
-    edtGcodeName: TEdit;
-    lblGcodeName: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    pnlNozzelTemp: TPanel;
+    lblNozzelTempCaption: TLabel;
+    lblNozzelTempMeasurments: TLabel;
+    nobxNozzelTemp: TNumberBox;
+    btnSaveSettings: TButton;
+    Label6: TLabel;
     procedure btnFrontClick(Sender: TObject);
     procedure btnTopClick(Sender: TObject);
     procedure btnRightClick(Sender: TObject);
@@ -116,12 +122,20 @@ type
     procedure redtSavePathDisplayChange(Sender: TObject);
     procedure btnGcodeSelectSavePathClick(Sender: TObject);
     procedure btnSliceExportClick(Sender: TObject);
+    procedure redtGcodeSavePathDisplayChange(Sender: TObject);
+    procedure btnSaveSettingsClick(Sender: TObject);
+    procedure pgctrlMainChange(Sender: TObject);
   private
     var
-      sImgPathTopView, sImgPathFrontView, sImgPathRightView, sSavePath, sName, sSiteForgePath, sUserPath, sInstalledPath : String;
-
+      sImgPathTopView, sImgPathFrontView, sImgPathRightView, sSavePath, sName, sSiteForgePath, sUserPath, sInstalledPath,
+      sGcodeSavePath : String;
+      bGeneratedSuccessfully, bLoadSettings, bResetupIni: Boolean;
     function OpenImageFileSelect(sTitle : String): String;
-    function ShellExecute_AndWait(FileName: string; Params: string): bool;
+    function ShellExecuteAndWait(FileName: string; Params: string): bool;
+    procedure SaveSettings;
+    procedure LoadSettings;
+    procedure SetupIniForEditing;
+    procedure SetupIniForSlicing;
   public
     { Public declarations }
   end;
@@ -132,6 +146,80 @@ var
 implementation
 
 {$R *.dfm}
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TfrmMain.SaveSettings;
+var
+  Ini: TIniFile;
+  bSaved: Boolean;
+begin
+  bSaved := True;
+  Ini := TIniFile.Create(ChangeFileExt(sInstalledPath, '\bin\slic3r\config.ini'));
+  try
+    try
+      Ini.WriteFloat('DEFAULT', 'temperature', nobxNozzelTemp.Value);
+
+    except
+      on E: Exception do
+      begin
+        bSaved := False;
+        ShowMessage('There was an error when saving your settings.');
+      end;
+    end;
+  finally
+    Ini.Free;
+  end;
+
+  if bSaved then
+    ShowMessage('Settings saved successfully.');
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TfrmMain.LoadSettings;
+var
+  Ini: TIniFile;
+begin
+  Ini := TIniFile.Create(ChangeFileExt(sInstalledPath, '\bin\slic3r\config.ini'));
+  try
+    try
+      nobxNozzelTemp.Value := Ini.ReadFloat('DEFAULT', 'temperature', 200);
+
+    except
+      on E: Exception do
+      begin
+        ShowMessage('There was an error when loading your settings.');
+      end;
+    end;
+  finally
+    Ini.Free;
+  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TfrmMain.SetupIniForEditing();
+var
+  sLoadedIniFile: String;
+begin
+  sLoadedIniFile := TFile.ReadAllText(sInstalledPath + '\bin\slic3r\config.ini');
+
+  sLoadedIniFile := '[DEFAULT]' + #13#10 + sLoadedIniFile;
+
+  TFile.WriteAllText(sInstalledPath + '\bin\slic3r\config.ini', sLoadedIniFile);
+end;
+
+procedure TfrmMain.SetupIniForSlicing();
+var
+  sLoadedIniFile: String;
+begin
+  sLoadedIniFile := TFile.ReadAllText(sInstalledPath + '\bin\slic3r\config.ini');
+
+  Delete(sLoadedIniFile, 1, 8);
+
+  TFile.WriteAllText(sInstalledPath + '\bin\slic3r\config.ini', sLoadedIniFile);
+end;
 
 function TfrmMain.OpenImageFileSelect(sTitle : String): String;
 var
@@ -153,13 +241,35 @@ begin
 
 end;
 
+procedure TfrmMain.pgctrlMainChange(Sender: TObject);
+begin
+  if (pgctrlMain.TabIndex = 2) and (bLoadSettings) then
+  begin
+    LoadSettings();
+    bLoadSettings := False;
+  end;
+
+  if (pgctrlMain.TabIndex = 2) and (bResetupIni) then
+  begin
+    SetupIniForEditing();
+    bResetupIni := False;
+  end;
+
+end;
+
+procedure TfrmMain.redtGcodeSavePathDisplayChange(Sender: TObject);
+begin
+  if redtGcodeSavePathDisplay.Text <> '' then
+    sGcodeSavePath := redtGcodeSavePathDisplay.Text;
+end;
+
 procedure TfrmMain.redtSavePathDisplayChange(Sender: TObject);
 begin
   if redtSavePathDisplay.Text <> '' then
     sSavePath := redtSavePathDisplay.Text;
 end;
 
-function TfrmMain.ShellExecute_AndWait(FileName: string; Params: string): bool;
+function TfrmMain.ShellExecuteAndWait(FileName: string; Params: string): bool;
 var
   exInfo: TShellExecuteInfo;
   Ph: DWORD;
@@ -208,9 +318,32 @@ begin
 
 end;
 
-procedure TfrmMain.btnSliceExportClick(Sender: TObject);
+procedure TfrmMain.btnSaveSettingsClick(Sender: TObject);
 begin
-  ShellExecute_AndWait()
+  SaveSettings();
+end;
+
+procedure TfrmMain.btnSliceExportClick(Sender: TObject);
+var
+  sSlicerRunArgs, sSlicerExecutable: String;
+begin
+
+  SetupIniForSlicing();
+
+  sSlicerRunArgs := '--no-gui';
+  sSlicerRunArgs := sSlicerRunArgs + ' --output "' + sGcodeSavePath + '"';
+  sSlicerRunArgs := sSlicerRunArgs + ' --scale 0.9302325581';
+  sSlicerRunArgs := sSlicerRunArgs + ' --load "' + sInstalledPath + '\bin\slic3r\config.ini"';
+  sSlicerRunArgs := sSlicerRunArgs + ' "' + sSiteForgePath + '\stl-backups\' + sName + '.stl"';
+
+  sSlicerExecutable := '"' + sInstalledPath + '\bin\slic3r\Slic3r-debug-console.exe"';
+
+  if ShellExecuteAndWait(sSlicerExecutable, sSlicerRunArgs) then
+    ShowMessage('Your 3D model has been sliced successfully.')
+  else
+    ShowMessage('There was an error when slicing your 3D model.');
+
+  bResetupIni := True;
 end;
 
 procedure TfrmMain.btnTopClick(Sender: TObject);
@@ -290,8 +423,6 @@ end;
 procedure TfrmMain.btnGenerateClick(Sender: TObject);
 var
   sPythonRunArgs, sPythonExecutable, sRenderedModelPath: String;
-  SEInfo: TShellExecuteInfo;
-  ExitCode: DWORD;
 begin
   sPythonRunArgs := '0';
   sPythonRunArgs := sPythonRunArgs + ' -TopViewPath ' + sImgPathTopView;
@@ -300,12 +431,28 @@ begin
   sPythonRunArgs := sPythonRunArgs + ' -Name ' + sName;
   sPythonRunArgs := sPythonRunArgs + ' -SavePath ' + sSavePath;
 
-  sRenderedModelPath := sSiteForgePath + '\renders\rendered_' + sName + '.png';
+  sRenderedModelPath := '' + sSiteForgePath + '\renders\rendered_' + sName + '.png';
 
-  sPythonExecutable := '"' + sInstalledPath + '\bin\V3.exe"';
+  sPythonExecutable := '"' + sInstalledPath + '\bin\python\V3.exe"';
 
-  if ShellExecute_AndWait(sPythonExecutable, sPythonRunArgs) then
-    imgPreview3DModel.Picture.LoadFromFile(sRenderedModelPath);
+  bGeneratedSuccessfully := True;
+
+  if ShellExecuteAndWait(sPythonExecutable, sPythonRunArgs) then
+  begin
+    try
+      imgPreview3DModel.Picture.LoadFromFile(sRenderedModelPath);
+    except
+      on E: Exception do
+      begin
+        bGeneratedSuccessfully := False;
+        if FileExists('' + sSiteForgePath + '\stl-backups\' + sName + '.stl') then
+          ShowMessage('Failed to locate render of 3D model.')
+        else
+          ShowMessage('Error when forming the 3D model.' + #13#10 + 'Cause: Bad images');
+      end;
+    end;
+
+  end;
 
 end;
 
@@ -318,8 +465,13 @@ begin
   sInstalledPath := TPath.GetAppPath;
 
   redtSavePathDisplay.Text := '';
+  redtGcodeSavePathDisplay.Text := '';
 
   pgctrlMain.TabIndex := 0;
+
+  bLoadSettings := True;
+
+  bResetupIni := True;
 
 end;
 
@@ -331,6 +483,12 @@ begin
     btnGenerate.Enabled := True
   else
     btnGenerate.Enabled := False;
+
+
+  if bGeneratedSuccessfully and (sGcodeSavePath <> '') then
+    btnSliceExport.Enabled := True
+  else
+    btnSliceExport.Enabled := False;
 
 end;
 

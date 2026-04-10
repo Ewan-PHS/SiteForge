@@ -42,9 +42,10 @@ object frmMain: TfrmMain
     Top = 0
     Width = 638
     Height = 584
-    ActivePage = tabSettings
+    ActivePage = tabModelGen
     Align = alClient
     TabOrder = 0
+    OnChange = pgctrlMainChange
     object tabModelGen: TTabSheet
       Caption = 'Model generation'
       object lblName: TLabel
@@ -4141,7 +4142,7 @@ object frmMain: TfrmMain
         Top = 0
         Width = 630
         Height = 546
-        ActivePage = tabPrintSettings
+        ActivePage = tabPrinterSettings
         Align = alClient
         TabOrder = 0
         object tabPrintSettings: TTabSheet
@@ -4184,7 +4185,7 @@ object frmMain: TfrmMain
             Top = 0
             Width = 622
             Height = 508
-            ActivePage = tabAdvancedMaterial
+            ActivePage = tabGeneralMaterial
             Align = alClient
             MultiLine = True
             TabOrder = 0
@@ -4572,6 +4573,15 @@ object frmMain: TfrmMain
             end
           end
         end
+      end
+      object btnSaveSettings: TButton
+        Left = 504
+        Top = 0
+        Width = 123
+        Height = 28
+        Caption = 'Save Settings'
+        TabOrder = 1
+        OnClick = btnSaveSettingsClick
       end
     end
   end

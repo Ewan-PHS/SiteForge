@@ -42,9 +42,10 @@ object frmMain: TfrmMain
     Top = 0
     Width = 638
     Height = 584
-    ActivePage = tabSlicing
+    ActivePage = tabSettings
     Align = alClient
     TabOrder = 0
+    OnChange = pgctrlMainChange
     object tabModelGen: TTabSheet
       Caption = 'Model generation'
       object lblName: TLabel
@@ -4141,7 +4142,7 @@ object frmMain: TfrmMain
         Top = 0
         Width = 630
         Height = 546
-        ActivePage = tabMaterialSettings
+        ActivePage = tabPrinterSettings
         Align = alClient
         TabOrder = 0
         object tabPrintSettings: TTabSheet
@@ -4184,7 +4185,7 @@ object frmMain: TfrmMain
             Top = 0
             Width = 622
             Height = 508
-            ActivePage = tabAdvancedMaterial
+            ActivePage = tabGeneralMaterial
             Align = alClient
             MultiLine = True
             TabOrder = 0
@@ -4217,6 +4218,7 @@ object frmMain: TfrmMain
                   Top = 37
                   Width = 121
                   Height = 31
+                  Mode = nbmFloat
                   TabOrder = 0
                 end
               end
@@ -4310,6 +4312,7 @@ object frmMain: TfrmMain
                   Top = 32
                   Width = 65
                   Height = 31
+                  Mode = nbmFloat
                   TabOrder = 0
                 end
                 object nobxBedShapeY: TNumberBox
@@ -4317,6 +4320,7 @@ object frmMain: TfrmMain
                   Top = 69
                   Width = 65
                   Height = 31
+                  Mode = nbmFloat
                   TabOrder = 1
                 end
                 object nobxBedShapeZ: TNumberBox
@@ -4324,6 +4328,7 @@ object frmMain: TfrmMain
                   Top = 106
                   Width = 65
                   Height = 31
+                  Mode = nbmFloat
                   TabOrder = 2
                 end
               end
@@ -4353,6 +4358,7 @@ object frmMain: TfrmMain
                   Top = 32
                   Width = 84
                   Height = 31
+                  Mode = nbmFloat
                   TabOrder = 0
                 end
               end
@@ -4509,6 +4515,7 @@ object frmMain: TfrmMain
                   Top = 37
                   Width = 121
                   Height = 31
+                  Mode = nbmFloat
                   TabOrder = 0
                 end
               end
@@ -4559,6 +4566,7 @@ object frmMain: TfrmMain
                   Top = 37
                   Width = 121
                   Height = 31
+                  Mode = nbmFloat
                   TabOrder = 0
                 end
                 object nobxRetractionSpeed: TNumberBox
@@ -4566,12 +4574,22 @@ object frmMain: TfrmMain
                   Top = 74
                   Width = 121
                   Height = 31
+                  Mode = nbmFloat
                   TabOrder = 1
                 end
               end
             end
           end
         end
+      end
+      object btnSaveSettings: TButton
+        Left = 504
+        Top = 0
+        Width = 123
+        Height = 28
+        Caption = 'Save Settings'
+        TabOrder = 1
+        OnClick = btnSaveSettingsClick
       end
     end
   end

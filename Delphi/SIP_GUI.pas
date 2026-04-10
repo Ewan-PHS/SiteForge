@@ -3,11 +3,11 @@ unit SIP_GUI;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
-  System.Classes, Vcl.Graphics,
+  Winapi.Windows, Winapi.Messages,
+  System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, System.IniFiles, System.IOUtils,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Imaging.pngimage, Vcl.Imaging.jpeg, Vcl.StdCtrls, Vcl.ExtCtrls,
-  ShellApi, FileCtrl, System.IOUtils, Vcl.ComCtrls,
-  Vcl.NumberBox;
+  Vcl.ComCtrls, Vcl.NumberBox,
+  ShellApi, FileCtrl, Vcl.Buttons, System.ImageList, Vcl.ImgList;
 
 type
   TfrmMain = class(TForm)
@@ -110,6 +110,8 @@ type
     lblNozzelTempCaption: TLabel;
     lblNozzelTempMeasurments: TLabel;
     nobxNozzelTemp: TNumberBox;
+    btnSaveSettings: TButton;
+    Label6: TLabel;
     procedure btnFrontClick(Sender: TObject);
     procedure btnTopClick(Sender: TObject);
     procedure btnRightClick(Sender: TObject);
@@ -121,12 +123,19 @@ type
     procedure btnGcodeSelectSavePathClick(Sender: TObject);
     procedure btnSliceExportClick(Sender: TObject);
     procedure redtGcodeSavePathDisplayChange(Sender: TObject);
+    procedure btnSaveSettingsClick(Sender: TObject);
+    procedure pgctrlMainChange(Sender: TObject);
   private
     var
-      sImgPathTopView, sImgPathFrontView, sImgPathRightView, sSavePath, sName, sSiteForgePath, sUserPath, sInstalledPath : String;
+      sImgPathTopView, sImgPathFrontView, sImgPathRightView, sSavePath, sName, sSiteForgePath, sUserPath, sInstalledPath,
       sGcodeSavePath : String;
+      bGeneratedSuccessfully, bLoadSettings, bResetupIni: Boolean;
     function OpenImageFileSelect(sTitle : String): String;
     function ShellExecuteAndWait(FileName: string; Params: string): bool;
+    procedure SaveSettings;
+    procedure LoadSettings;
+    procedure SetupIniForEditing;
+    procedure SetupIniForSlicing;
   public
     { Public declarations }
   end;
@@ -137,6 +146,82 @@ var
 implementation
 
 {$R *.dfm}
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TfrmMain.SaveSettings;
+var
+  Ini: TIniFile;
+  bSaved: Boolean;
+begin
+  bSaved := True;
+  Ini := TIniFile.Create(ChangeFileExt(sInstalledPath, '\bin\slic3r\config.ini'));
+  try
+    try
+      Ini.WriteFloat('DEFAULT', 'temperature', nobxNozzelTemp.Value);
+
+    except
+      on E: Exception do
+      begin
+        bSaved := False;
+        ShowMessage('There was an error when saving your settings.');
+      end;
+    end;
+  finally
+    Ini.Free;
+  end;
+
+  if bSaved then
+    ShowMessage('Settings saved successfully.');
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TfrmMain.LoadSettings;
+var
+  Ini: TIniFile;
+begin
+  Ini := TIniFile.Create(ChangeFileExt(sInstalledPath, '\bin\slic3r\config.ini'));
+  try
+    try
+      nobxNozzelTemp.Value := Ini.ReadFloat('DEFAULT', 'temperature', 200);
+
+    except
+      on E: Exception do
+      begin
+        ShowMessage('There was an error when loading your settings.');
+      end;
+    end;
+  finally
+    Ini.Free;
+  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure TfrmMain.SetupIniForEditing();
+var
+  sLoadedIniFile: String;
+begin
+  sLoadedIniFile := TFile.ReadAllText(sInstalledPath + '\bin\slic3r\config.ini');
+
+  sLoadedIniFile := '[DEFAULT]' + sLoadedIniFile;
+
+  TFile.WriteAllText(sInstalledPath + '\bin\slic3r\config.ini', sLoadedIniFile);
+end;
+
+procedure TfrmMain.SetupIniForSlicing();
+var
+  sLoadedIniFile: String;
+begin
+  sLoadedIniFile := TFile.ReadAllText(sInstalledPath + '\bin\slic3r\config.ini');
+
+  Delete(sLoadedIniFile, 1, 9);
+
+  TFile.WriteAllText(sInstalledPath + '\bin\slic3r\config.ini', sLoadedIniFile);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
 
 function TfrmMain.OpenImageFileSelect(sTitle : String): String;
 var
@@ -154,6 +239,22 @@ begin
     end;
   finally
     OpenDialog.Free;
+  end;
+
+end;
+
+procedure TfrmMain.pgctrlMainChange(Sender: TObject);
+begin
+  if (pgctrlMain.TabIndex = 2) and (bLoadSettings) then
+  begin
+    LoadSettings();
+    bLoadSettings := False;
+  end;
+
+  if (pgctrlMain.TabIndex = 2) and (bResetupIni) then
+  begin
+    SetupIniForEditing();
+    bResetupIni := False;
   end;
 
 end;
@@ -219,11 +320,18 @@ begin
 
 end;
 
+procedure TfrmMain.btnSaveSettingsClick(Sender: TObject);
+begin
+  SaveSettings();
+end;
+
 procedure TfrmMain.btnSliceExportClick(Sender: TObject);
 var
   sSlicerRunArgs, sSlicerExecutable: String;
-  SEInfo: TShellExecuteInfo;
 begin
+
+  SetupIniForSlicing();
+
   sSlicerRunArgs := '--no-gui';
   sSlicerRunArgs := sSlicerRunArgs + ' --output "' + sGcodeSavePath + '"';
   sSlicerRunArgs := sSlicerRunArgs + ' --scale 0.9302325581';
@@ -235,8 +343,9 @@ begin
   if ShellExecuteAndWait(sSlicerExecutable, sSlicerRunArgs) then
     ShowMessage('Your 3D model has been sliced successfully.')
   else
-    ShowMessage('There was an error when slicing your 3D model.')
+    ShowMessage('There was an error when slicing your 3D model.');
 
+  bResetupIni := True;
 end;
 
 procedure TfrmMain.btnTopClick(Sender: TObject);
@@ -316,7 +425,6 @@ end;
 procedure TfrmMain.btnGenerateClick(Sender: TObject);
 var
   sPythonRunArgs, sPythonExecutable, sRenderedModelPath: String;
-  SEInfo: TShellExecuteInfo;
 begin
   sPythonRunArgs := '0';
   sPythonRunArgs := sPythonRunArgs + ' -TopViewPath ' + sImgPathTopView;
@@ -325,19 +433,25 @@ begin
   sPythonRunArgs := sPythonRunArgs + ' -Name ' + sName;
   sPythonRunArgs := sPythonRunArgs + ' -SavePath ' + sSavePath;
 
-  sRenderedModelPath := '"' + sSiteForgePath + '\renders\rendered_' + sName + '.png"';
+  sRenderedModelPath := '' + sSiteForgePath + '\renders\rendered_' + sName + '.png';
 
   sPythonExecutable := '"' + sInstalledPath + '\bin\python\V3.exe"';
+
+  bGeneratedSuccessfully := True;
 
   if ShellExecuteAndWait(sPythonExecutable, sPythonRunArgs) then
   begin
     try
       imgPreview3DModel.Picture.LoadFromFile(sRenderedModelPath);
     except
-      if FileExists('"' + sSiteForgePath + '\stl-backups\' + sName + '.stl"') then
-        ShowMessage('Failed to locate render of 3D model.')
-      else
-        ShowMessage('Error when forming the 3D model.' + #10#13 + 'Cause: Bad images');
+      on E: Exception do
+      begin
+        bGeneratedSuccessfully := False;
+        if FileExists('' + sSiteForgePath + '\stl-backups\' + sName + '.stl') then
+          ShowMessage('Failed to locate render of 3D model.')
+        else
+          ShowMessage('Error when forming the 3D model.' + #13#10 + 'Cause: Bad images');
+      end;
     end;
 
   end;
@@ -357,6 +471,10 @@ begin
 
   pgctrlMain.TabIndex := 0;
 
+  bLoadSettings := True;
+
+  bResetupIni := True;
+
 end;
 
 procedure TfrmMain.tmr10msTimer(Sender: TObject);
@@ -367,6 +485,12 @@ begin
     btnGenerate.Enabled := True
   else
     btnGenerate.Enabled := False;
+
+
+  if bGeneratedSuccessfully and (sGcodeSavePath <> '') then
+    btnSliceExport.Enabled := True
+  else
+    btnSliceExport.Enabled := False;
 
 end;
 
