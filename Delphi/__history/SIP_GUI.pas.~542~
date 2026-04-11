@@ -214,9 +214,9 @@ begin
 
       if (sSpecificSection <> '') and (sSpecificIdent <> '') and (sSpecificValue <> '') then
       begin
-        if CharInSet(LowerCase(sSpecificValue[1])[1], ['a'..'z']) then
+        if LowerCase(sSpecificValue[1])[1] in ['a'..'z'] then
           Ini.WriteString(sSpecificSection, sSpecificIdent, sSpecificValue)
-        else if (CharInSet(sSpecificValue[1], ['0'..'9'])) or (CharInSet(sSpecificValue[1], ['-'])) then
+        else if (sSpecificValue[1] in ['0'..'9']) or (sSpecificValue[1] in ['-']) then
           Ini.WriteFloat(sSpecificSection, sSpecificIdent, StrToFloat(sSpecificValue));
       end;
 
@@ -281,8 +281,7 @@ begin
   end;
 
   if bSaved then
-    if bShowMessage then
-      ShowMessage('Settings saved successfully.');
+    ShowMessage('Settings saved successfully.');
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -725,7 +724,7 @@ begin
   if chkbxAutoCountThreads.Checked and (nobxNumberThreads.Value <> System.CPUCount) then
   begin
     nobxNumberThreads.Value := System.CPUCount;
-    SaveSettings('DEFAULT', 'threads', FloatToStr(nobxNumberThreads.Value), False);
+    SaveSettings('DEFAULT', 'threads', FloatToStr(nobxNumberThreads.Value));
   end;
 
 end;

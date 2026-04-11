@@ -37,7 +37,7 @@ type
     pgctrlMain: TPageControl;
     tabModelGen: TTabSheet;
     tabSlicing: TTabSheet;
-    tabSettings: TTabSheet;
+    tabSlicerSettings: TTabSheet;
     pgctrlSettings: TPageControl;
     tabPrintSettings: TTabSheet;
     tabMaterialSettings: TTabSheet;
@@ -55,28 +55,19 @@ type
     pnlBedDimentions: TPanel;
     nobxBedShapeX: TNumberBox;
     nobxBedShapeY: TNumberBox;
-    nobxBedShapeZ: TNumberBox;
     lblBedDimsCaption: TLabel;
     lblbedDimsX: TLabel;
     lblbedDimsY: TLabel;
-    lblbedDimsZ: TLabel;
     pnlZOffset: TPanel;
     lblZOffsetCaption: TLabel;
     nobxZOffset: TNumberBox;
-    pnlGcodeFlavor: TPanel;
-    lblGcodeFlavorCaption: TLabel;
-    cmbbxGcodeFlavor: TComboBox;
     tabExtruder: TTabSheet;
-    pnlNozzelDiamater: TPanel;
-    lblNozzelDiameterCaption: TLabel;
-    nobxNozzelDiameter: TNumberBox;
-    lblNozzelDiameterMeasurements: TLabel;
-    Label1: TLabel;
-    Label2: TLabel;
-    Label3: TLabel;
+    pnlNozzleDiamater: TPanel;
+    lblNozzleDiameterCaption: TLabel;
+    nobxNozzleDiameter: TNumberBox;
+    lblNozzleDiameterMeasurements: TLabel;
     lblBedShapeXDimensions: TLabel;
     lblBedShapeYDimensions: TLabel;
-    lblBedShapeZDimensions: TLabel;
     lblZOffsetDimensions: TLabel;
     pnlRetraction: TPanel;
     lblRetractionCaption: TLabel;
@@ -106,12 +97,71 @@ type
     btnGcodeSelectSavePath: TButton;
     Label4: TLabel;
     Label5: TLabel;
-    pnlNozzelTemp: TPanel;
-    lblNozzelTempCaption: TLabel;
-    lblNozzelTempMeasurments: TLabel;
-    nobxNozzelTemp: TNumberBox;
+    pnlNozzleTemp: TPanel;
+    lblNozzleTempCaption: TLabel;
+    lblNozzleTempMeasurments: TLabel;
+    nobxNozzleTemp: TNumberBox;
     btnSaveSettings: TButton;
     Label6: TLabel;
+    pnlGcodeFlavor: TPanel;
+    lblGcodeFlavorCaption: TLabel;
+    cmbbxGcodeFlavor: TComboBox;
+    pnlFLayerNozzleTemp: TPanel;
+    lblFLayerNozzleTempCaption: TLabel;
+    lblFLayerNozzleTempMeasuments: TLabel;
+    nobxFLayerNozzleTemp: TNumberBox;
+    pnlFLayerBedTemp: TPanel;
+    lblFLayerBedTempCaption: TLabel;
+    lblFLayerBedTempMeasurements: TLabel;
+    nobxFLayerBedTemp: TNumberBox;
+    pnlBedTemp: TPanel;
+    lblBedTempCaption: TLabel;
+    lblBedTempMeasurements: TLabel;
+    nobxBedTemp: TNumberBox;
+    pnlLayerHeight: TPanel;
+    lblLayerHeightCaption: TLabel;
+    lblLayerHeightMeasurements: TLabel;
+    nobxLayerHeight: TNumberBox;
+    pnlFLayerHeight: TPanel;
+    lblFLayerHeightCaption: TLabel;
+    lblFLayerHeightMeasurements: TLabel;
+    nobxFLayerHeight: TNumberBox;
+    pnlMaxLayerHeight: TPanel;
+    lblMaxLayerHeightCaption: TLabel;
+    lblMaxLayerHeightMeasurements: TLabel;
+    nobxMaxLayerHeight: TNumberBox;
+    pnlMinLayerHeight: TPanel;
+    lblMinLayerHeightcaption: TLabel;
+    lblMinLayerHeightMeasurements: TLabel;
+    nobxMinLayerHeight: TNumberBox;
+    pnlInfillSpeed: TPanel;
+    lblInfillSpeedCaption: TLabel;
+    lblInfillSpeedMeasuments: TLabel;
+    nobxInfillSpeed: TNumberBox;
+    pnlFLayerSpeed: TPanel;
+    lblFLayerSpeedCaption: TLabel;
+    lblFLayerSpeedMeasurements: TLabel;
+    nobxFLayerSpeed: TNumberBox;
+    pnlMaxPrintSpeed: TPanel;
+    lblMaxPrintSpeedCaption: TLabel;
+    lblMaxPrintSpeedMeasurements: TLabel;
+    nobxMaxPrintSpeed: TNumberBox;
+    pnlMinPrintSpeed: TPanel;
+    lblMinPrintSpeedCaption: TLabel;
+    lblMinPrintSpeedMeasurements: TLabel;
+    nobxMinPrintSpeed: TNumberBox;
+    Label7: TLabel;
+    lblSlicerInfo: TLabel;
+    shpSlicerInfo: TShape;
+    Label8: TLabel;
+    Shape5: TShape;
+    tabPreferences: TTabSheet;
+    pnlNumberThreads: TPanel;
+    lblNumberThreadsCaption: TLabel;
+    nobxNumberThreads: TNumberBox;
+    btnSavePreferences: TButton;
+    Label1: TLabel;
+    chkbxAutoCountThreads: TCheckBox;
     procedure btnFrontClick(Sender: TObject);
     procedure btnTopClick(Sender: TObject);
     procedure btnRightClick(Sender: TObject);
@@ -125,17 +175,19 @@ type
     procedure redtGcodeSavePathDisplayChange(Sender: TObject);
     procedure btnSaveSettingsClick(Sender: TObject);
     procedure pgctrlMainChange(Sender: TObject);
+    procedure btnSavePreferencesClick(Sender: TObject);
   private
     var
       sImgPathTopView, sImgPathFrontView, sImgPathRightView, sSavePath, sName, sSiteForgePath, sUserPath, sInstalledPath,
       sGcodeSavePath : String;
       bGeneratedSuccessfully, bLoadSettings, bResetupIni: Boolean;
     function OpenImageFileSelect(sTitle : String): String;
-    function ShellExecuteAndWait(FileName: string; Params: string): bool;
-    procedure SaveSettings;
+    function ShellExecuteAndWait(FileName, Params, lpVerb: string): bool;
+    procedure SaveSettings(sSpecificSection: String = ''; sSpecificIdent: String = ''; sSpecificValue: String = ''; bShowMessage: Boolean = True);
     procedure LoadSettings;
     procedure SetupIniForEditing;
     procedure SetupIniForSlicing;
+    function FormatBedShapeForLoading(sBedShape: String): TArray<Extended>;
   public
     { Public declarations }
   end;
@@ -149,16 +201,72 @@ implementation
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TfrmMain.SaveSettings;
+procedure TfrmMain.SaveSettings(sSpecificSection: String = ''; sSpecificIdent: String = ''; sSpecificValue: String = ''; bShowMessage: Boolean = True);
 var
   Ini: TIniFile;
   bSaved: Boolean;
+  sGcodeText: String;
 begin
   bSaved := True;
-  Ini := TIniFile.Create(ChangeFileExt(sInstalledPath, '\bin\slic3r\config.ini'));
+  Ini := TIniFile.Create(ChangeFileExt(sSiteForgePath, '\config\slicerConfig.ini'));
   try
     try
-      Ini.WriteFloat('DEFAULT', 'temperature', nobxNozzelTemp.Value);
+
+      if (sSpecificSection <> '') and (sSpecificIdent <> '') and (sSpecificValue <> '') then
+      begin
+        if LowerCase(sSpecificValue[1])[1] in ['a'..'z'] then
+          Ini.WriteString(sSpecificSection, sSpecificIdent, sSpecificValue)
+        else if (sSpecificValue[1] in ['0'..'9']) or (sSpecificValue[1] in ['-']) then
+          Ini.WriteFloat(sSpecificSection, sSpecificIdent, StrToFloat(sSpecificValue));
+      end;
+
+
+    // Print
+      // Layers
+      // Speed
+      // Advanced
+
+    // Material
+      // General
+      Ini.WriteFloat('DEFAULT', 'temperature', nobxNozzleTemp.Value);
+      Ini.WriteFloat('DEFAULT', 'first_layer_temperature', nobxFLayerNozzleTemp.Value);
+      Ini.WriteFloat('DEFAULT', 'bed_temperature', nobxBedTemp.Value);
+      Ini.WriteFloat('DEFAULT', 'first_layer_bed_temperature', nobxFLayerBedTemp.Value);
+      // Advanced
+
+    // Printer
+      // General
+      Ini.WriteString('DEFAULT', 'bed_shape', ('0x0,' +
+      FloatToStr(nobxBedShapeX.Value) + 'x0,' +
+      FloatToStr(nobxBedShapeX.Value) + 'x' +
+      FloatToStr(nobxBedShapeY.Value) + ',0x' +
+      FloatToStr(nobxBedShapeY.Value) + ''));
+
+      Ini.WriteFloat('DEFAULT', 'z_offset', nobxZOffset.Value);
+      // Custom Gcode
+      sGcodeText := memPrinterGcodeStart.Text;
+      sGcodeText := StringReplace(sGcodeText, #13#10, '\n', [rfReplaceAll]);
+      Ini.WriteString('DEFAULT', 'start_gcode', sGcodeText);
+
+      sGcodeText := memPrinterGcodeEnd.Text;
+      sGcodeText := StringReplace(sGcodeText, #13#10, '\n', [rfReplaceAll]);
+      Ini.WriteString('DEFAULT', 'end_gcode', sGcodeText);
+
+      sGcodeText := memPrinterGcodeBeforeLayerChange.Text;
+      sGcodeText := StringReplace(sGcodeText, #13#10, '\n', [rfReplaceAll]);
+      Ini.WriteString('DEFAULT', 'before_layer_gcode', sGcodeText);
+
+      sGcodeText := memPrinterGcodeAfterLayerChange.Text;
+      sGcodeText := StringReplace(sGcodeText, #13#10, '\n', [rfReplaceAll]);
+      Ini.WriteString('DEFAULT', 'layer_gcode', sGcodeText);
+      // Extruder
+      Ini.WriteFloat('DEFAULT', 'nozzle_diameter', nobxNozzleDiameter.Value);
+      Ini.WriteFloat('DEFAULT', 'retract_length', nobxRetractionLength.Value);
+      Ini.WriteFloat('DEFAULT', 'retract_speed', nobxRetractionSpeed.Value);
+
+    // Preferences
+      Ini.WriteInteger('DEFAULT', 'threads', Round(nobxNumberThreads.Value));
+      Ini.WriteBool('SITEFORGE', 'auto_count_threads', chkbxAutoCountThreads.Checked);
 
     except
       on E: Exception do
@@ -180,11 +288,66 @@ end;
 procedure TfrmMain.LoadSettings;
 var
   Ini: TIniFile;
+  sGcodeText: String;
+  arrExtended: TArray<Extended>;
 begin
-  Ini := TIniFile.Create(ChangeFileExt(sInstalledPath, '\bin\slic3r\config.ini'));
+  SetLength(arrExtended, 2);
+
+  Ini := TIniFile.Create(ChangeFileExt(sSiteForgePath, '\config\slicerConfig.ini'));
   try
     try
-      nobxNozzelTemp.Value := Ini.ReadFloat('DEFAULT', 'temperature', 200);
+    // Print
+      // Layers
+      nobxLayerHeight.Value := Ini.ReadFloat('DEFAULT', 'layer_height', 0.2);
+      nobxFLayerHeight.Value := Ini.ReadFloat('DEFAULT', 'first_layer_height', 0.15);
+      nobxMinLayerHeight.Value := Ini.ReadFloat('DEFAULT', 'min_layer_height', 0.2);
+      nobxMaxLayerHeight.Value := Ini.ReadFloat('DEFAULT', 'max_layer_height', 0.3);
+      // Speed
+      nobxInfillSpeed.Value := Ini.ReadFloat('DEFAULT', 'infill_speed', 80);
+      nobxFLayerSpeed.Value := Ini.ReadFloat('DEFAULT', 'first_layer_speed', 30);
+      nobxMinPrintSpeed.Value := Ini.ReadFloat('DEFAULT', 'min_print_speed', 10);
+      nobxMaxPrintSpeed.Value := Ini.ReadFloat('DEFAULT', 'max_print_speed', 80);
+      // Advanced
+
+    // Material
+      // General
+      nobxNozzleTemp.Value := Ini.ReadFloat('DEFAULT', 'temperature', 200);
+      nobxFLayerNozzleTemp.Value := Ini.ReadFloat('DEFAULT', 'first_layer_temperature', 210);
+      nobxBedTemp.Value := Ini.ReadFloat('DEFAULT', 'bed_temperature', 60);
+      nobxFLayerBedTemp.Value := Ini.ReadFloat('DEFAULT', 'first_layer_bed_temperature', 65);
+      // Advanced
+
+    // Printer
+      // General
+      arrExtended := FormatBedShapeForLoading(Ini.ReadString('DEFAULT', 'bed_shape', ''));
+      nobxBedShapeX.Value := arrExtended[0];
+      nobxBedShapeY.Value := arrExtended[1];
+
+      nobxZOffset.Value := Ini.ReadFloat('DEFAULT', 'z_offset', 0);
+      // Custom Gcode
+      sGcodeText := Ini.ReadString('DEFAULT', 'start_gcode', 'G28');
+      sGcodeText := StringReplace(sGcodeText, '\n', #13#10, [rfReplaceAll]);
+      memPrinterGcodeStart.Text := sGcodeText;
+
+      sGcodeText := Ini.ReadString('DEFAULT', 'end_gcode', 'M104 S0');
+      sGcodeText := StringReplace(sGcodeText, '\n', #13#10, [rfReplaceAll]);
+      memPrinterGcodeEnd.Text := sGcodeText;
+
+      sGcodeText := Ini.ReadString('DEFAULT', 'before_layer_gcode', '');
+      sGcodeText := StringReplace(sGcodeText, '\n', #13#10, [rfReplaceAll]);
+      memPrinterGcodeBeforeLayerChange.Text := sGcodeText;
+
+      sGcodeText := Ini.ReadString('DEFAULT', 'layer_gcode', '');
+      sGcodeText := StringReplace(sGcodeText, '\n', #13#10, [rfReplaceAll]);
+      memPrinterGcodeAfterLayerChange.Text := sGcodeText;
+      // Extruder
+      nobxNozzleDiameter.Value := Ini.ReadFloat('DEFAULT', 'nozzle_diameter', 0.4);
+      nobxRetractionLength.Value := Ini.ReadFloat('DEFAULT', 'retract_length', 2);
+      nobxRetractionSpeed.Value := Ini.ReadFloat('DEFAULT', 'retract_speed', 40);
+
+    // Preferences
+      nobxNumberThreads.Value := Ini.ReadInteger('DEFAULT', 'threads', 4);
+      chkbxAutoCountThreads.Checked := Ini.ReadBool('SITEFORGE', 'auto_count_threads', True);
 
     except
       on E: Exception do
@@ -203,23 +366,75 @@ procedure TfrmMain.SetupIniForEditing();
 var
   sLoadedIniFile: String;
 begin
-  sLoadedIniFile := TFile.ReadAllText(sInstalledPath + '\bin\slic3r\config.ini');
+  sLoadedIniFile := TFile.ReadAllText(sSiteForgePath + '\config\slicerConfig.ini');
 
-  sLoadedIniFile := '[DEFAULT]' + #13#10 + sLoadedIniFile;
+  if sLoadedIniFile[1] <> '[' then
+    sLoadedIniFile := '[DEFAULT]' + sLoadedIniFile;
 
-  TFile.WriteAllText(sInstalledPath + '\bin\slic3r\config.ini', sLoadedIniFile);
+  TFile.WriteAllText(sSiteForgePath + '\config\slicerConfig.ini', sLoadedIniFile);
 end;
 
 procedure TfrmMain.SetupIniForSlicing();
 var
   sLoadedIniFile: String;
 begin
-  sLoadedIniFile := TFile.ReadAllText(sInstalledPath + '\bin\slic3r\config.ini');
+  sLoadedIniFile := TFile.ReadAllText(sSiteForgePath + '\config\slicerConfig.ini');
 
-  Delete(sLoadedIniFile, 1, 8);
+  if sLoadedIniFile[1] = '[' then
+    Delete(sLoadedIniFile, 1, 9);
 
-  TFile.WriteAllText(sInstalledPath + '\bin\slic3r\config.ini', sLoadedIniFile);
+  TFile.WriteAllText(sSiteForgePath + '\config\slicerConfig.ini', sLoadedIniFile);
 end;
+
+function TfrmMain.FormatBedShapeForLoading(sBedShape: String): TArray<Extended>;
+var
+  iCountComma, iCountCharX: Integer;
+  iIndex, jIndex: Integer;
+  sBuildingNumber: String;
+  bFoundXValue, bFoundYValue: Boolean;
+begin
+  // Input format: 0x0,Xx0,XxY,0xY
+  SetLength(Result, 2);
+  iCountComma := 0;
+  iCountCharX := 0;
+  bFoundXValue := False;
+  bFoundYValue := False;
+
+  for iIndex := 1 to Length(sBedShape) do
+  begin
+    if sBedShape[iIndex] = ',' then
+      Inc(iCountComma)
+    else if sBedShape[iIndex] = 'x' then
+      Inc(iCountCharX);
+
+    if (iCountComma = 1) and (bFoundXValue = False) then
+    begin
+      sBuildingNumber := '';
+      jIndex := iIndex;
+      repeat
+        Inc(jIndex);
+        sBuildingNumber := sBuildingNumber + sBedShape[jIndex];
+      until sBedShape[jIndex + 1] = 'x';
+      Result[0] := StrToFloat(sBuildingNumber);
+      bFoundXValue := True;
+    end;
+
+    if (iCountCharX = 3) and (bFoundYValue = False) then
+    begin
+      sBuildingNumber := '';
+      jIndex := iIndex;
+      repeat
+        Inc(jIndex);
+        sBuildingNumber := sBuildingNumber + sBedShape[jIndex];
+      until sBedShape[jIndex + 1] = ',';
+      Result[1] := StrToFloat(sBuildingNumber);
+      bFoundYValue := True;
+    end;
+
+  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
 
 function TfrmMain.OpenImageFileSelect(sTitle : String): String;
 var
@@ -243,13 +458,13 @@ end;
 
 procedure TfrmMain.pgctrlMainChange(Sender: TObject);
 begin
-  if (pgctrlMain.TabIndex = 2) and (bLoadSettings) then
+  if ((pgctrlMain.TabIndex = 2)or(pgctrlMain.TabIndex = 3)) and (bLoadSettings) then
   begin
     LoadSettings();
     bLoadSettings := False;
   end;
 
-  if (pgctrlMain.TabIndex = 2) and (bResetupIni) then
+  if ((pgctrlMain.TabIndex = 2)or(pgctrlMain.TabIndex = 3)) and (bResetupIni) then
   begin
     SetupIniForEditing();
     bResetupIni := False;
@@ -269,7 +484,7 @@ begin
     sSavePath := redtSavePathDisplay.Text;
 end;
 
-function TfrmMain.ShellExecuteAndWait(FileName: string; Params: string): bool;
+function TfrmMain.ShellExecuteAndWait(FileName, Params, lpVerb: string): bool;
 var
   exInfo: TShellExecuteInfo;
   Ph: DWORD;
@@ -281,7 +496,7 @@ begin
     cbSize := SizeOf(exInfo);
     fMask := SEE_MASK_NOCLOSEPROCESS or SEE_MASK_FLAG_DDEWAIT;
     Wnd := GetActiveWindow();
-    exInfo.lpVerb := 'open';
+    exInfo.lpVerb := lpVerb;
     exInfo.lpParameters := PChar(Params);
     lpFile := PChar(FileName);
     nShow := SW_HIDE;
@@ -318,6 +533,11 @@ begin
 
 end;
 
+procedure TfrmMain.btnSavePreferencesClick(Sender: TObject);
+begin
+  SaveSettings();
+end;
+
 procedure TfrmMain.btnSaveSettingsClick(Sender: TObject);
 begin
   SaveSettings();
@@ -326,7 +546,6 @@ end;
 procedure TfrmMain.btnSliceExportClick(Sender: TObject);
 var
   sSlicerRunArgs, sSlicerExecutable: String;
-  SEInfo: TShellExecuteInfo;
 begin
 
   SetupIniForSlicing();
@@ -334,12 +553,12 @@ begin
   sSlicerRunArgs := '--no-gui';
   sSlicerRunArgs := sSlicerRunArgs + ' --output "' + sGcodeSavePath + '"';
   sSlicerRunArgs := sSlicerRunArgs + ' --scale 0.9302325581';
-  sSlicerRunArgs := sSlicerRunArgs + ' --load "' + sInstalledPath + '\bin\slic3r\config.ini"';
+  sSlicerRunArgs := sSlicerRunArgs + ' --load "' + sSiteForgePath + '\config\slicerConfig.ini"';
   sSlicerRunArgs := sSlicerRunArgs + ' "' + sSiteForgePath + '\stl-backups\' + sName + '.stl"';
 
-  sSlicerExecutable := '"' + sInstalledPath + '\bin\slic3r\Slic3r-debug-console.exe"';
+  sSlicerExecutable := '"' + sInstalledPath + '\bin\slic3r\Slic3r-console.exe"';
 
-  if ShellExecuteAndWait(sSlicerExecutable, sSlicerRunArgs) then
+  if ShellExecuteAndWait(sSlicerExecutable, sSlicerRunArgs, 'runas') then
     ShowMessage('Your 3D model has been sliced successfully.')
   else
     ShowMessage('There was an error when slicing your 3D model.');
@@ -424,7 +643,6 @@ end;
 procedure TfrmMain.btnGenerateClick(Sender: TObject);
 var
   sPythonRunArgs, sPythonExecutable, sRenderedModelPath: String;
-  SEInfo: TShellExecuteInfo;
 begin
   sPythonRunArgs := '0';
   sPythonRunArgs := sPythonRunArgs + ' -TopViewPath ' + sImgPathTopView;
@@ -439,18 +657,20 @@ begin
 
   bGeneratedSuccessfully := True;
 
-  if ShellExecuteAndWait(sPythonExecutable, sPythonRunArgs) then
+  if ShellExecuteAndWait(sPythonExecutable, sPythonRunArgs, 'open') then
   begin
     try
       imgPreview3DModel.Picture.LoadFromFile(sRenderedModelPath);
     except
       on E: Exception do
       begin
-        bGeneratedSuccessfully := False;
         if FileExists('' + sSiteForgePath + '\stl-backups\' + sName + '.stl') then
           ShowMessage('Failed to locate render of 3D model.')
         else
+        begin
+          bGeneratedSuccessfully := False;
           ShowMessage('Error when forming the 3D model.' + #13#10 + 'Cause: Bad images');
+        end;
       end;
     end;
 
@@ -470,10 +690,18 @@ begin
   redtGcodeSavePathDisplay.Text := '';
 
   pgctrlMain.TabIndex := 0;
+  pgctrlSettings.TabIndex := 0;
+  pgctrlPrintSettings.TabIndex := 0;
+  pgctrlMaterialSettings.TabIndex := 0;
+  pgctrlPrinterSettings.TabIndex := 0;
 
   bLoadSettings := True;
-
   bResetupIni := True;
+
+  memPrinterGcodeStart.Text := '';
+  memPrinterGcodeEnd.Text := '';
+  memPrinterGcodeBeforeLayerChange.Text := '';
+  memPrinterGcodeAfterLayerChange.Text := '';
 
 end;
 
@@ -491,6 +719,12 @@ begin
     btnSliceExport.Enabled := True
   else
     btnSliceExport.Enabled := False;
+
+  if chkbxAutoCountThreads.Checked and (nobxNumberThreads.Value <> System.CPUCount) then
+  begin
+    nobxNumberThreads.Value := System.CPUCount;
+    SaveSettings('DEFAULT', 'threads', FloatToStr(nobxNumberThreads.Value));
+  end;
 
 end;
 

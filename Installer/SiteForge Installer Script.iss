@@ -49,12 +49,14 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "{app}\bin"; Flags: uninsalwaysuninstall
 Name: "{app}\bin\python"; Flags: uninsalwaysuninstall
 Name: "{app}\bin\slic3r"; Flags: uninsalwaysuninstall
+Name: "{localappdata}\SiteForge\config";
 
 [Files]
 Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Delphi\Win64\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Python\dist\V3\*"; DestDir: "{app}\bin\python"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Installer\vc_redist.x64.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Installer\Slic3r-1.3.0.64bit\*"; DestDir: "{app}\bin\slic3r"; Flags: ignoreversion
+Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Installer\Slic3r-1.3.0.64bit\*"; DestDir: "{app}\bin\slic3r"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Installer\slicerConfig.ini"; DestDir: "{localappdata}\SiteForge\config"; Flags: ignoreversion 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

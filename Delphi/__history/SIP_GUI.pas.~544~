@@ -214,9 +214,9 @@ begin
 
       if (sSpecificSection <> '') and (sSpecificIdent <> '') and (sSpecificValue <> '') then
       begin
-        if CharInSet(LowerCase(sSpecificValue[1])[1], ['a'..'z']) then
+        if LowerCase(sSpecificValue[1])[1] in ['a'..'z'] then
           Ini.WriteString(sSpecificSection, sSpecificIdent, sSpecificValue)
-        else if (CharInSet(sSpecificValue[1], ['0'..'9'])) or (CharInSet(sSpecificValue[1], ['-'])) then
+        else if (sSpecificValue[1] in ['0'..'9']) or (sSpecificValue[1] in ['-']) then
           Ini.WriteFloat(sSpecificSection, sSpecificIdent, StrToFloat(sSpecificValue));
       end;
 
