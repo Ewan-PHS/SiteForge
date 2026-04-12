@@ -21,12 +21,21 @@ object frmMain: TfrmMain
     Top = 0
     Width = 638
     Height = 584
-    ActivePage = tabPreferences
+    ActivePage = tabModelGen
     Align = alClient
     TabOrder = 0
     OnChange = pgctrlMainChange
     object tabModelGen: TTabSheet
       Caption = 'Model generation'
+      object Shape6: TShape
+        Left = 264
+        Top = 480
+        Width = 20
+        Height = 23
+        ParentShowHint = False
+        Shape = stCircle
+        ShowHint = False
+      end
       object lblName: TLabel
         Left = 3
         Top = 468
@@ -1972,7 +1981,7 @@ object frmMain: TfrmMain
         Stretch = True
       end
       object Shape5: TShape
-        Left = 606
+        Left = 607
         Top = 488
         Width = 20
         Height = 23
@@ -1981,13 +1990,23 @@ object frmMain: TfrmMain
         ShowHint = False
       end
       object Label8: TLabel
-        Left = 606
+        Left = 607
         Top = 488
         Width = 20
         Height = 23
         Hint = 
           'It is required that you fill '#13'all the fields and select images'#13'b' +
           'efore you can generate.'
+        Caption = '  i  '
+        ParentShowHint = False
+        ShowHint = True
+      end
+      object Label2: TLabel
+        Left = 264
+        Top = 480
+        Width = 20
+        Height = 23
+        Hint = 'Name must not contain:'#13'Spaces'
         Caption = '  i  '
         ParentShowHint = False
         ShowHint = True

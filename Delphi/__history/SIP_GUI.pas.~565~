@@ -162,6 +162,8 @@ type
     btnSavePreferences: TButton;
     Label1: TLabel;
     chkbxAutoCountThreads: TCheckBox;
+    Label2: TLabel;
+    Shape6: TShape;
     procedure btnFrontClick(Sender: TObject);
     procedure btnTopClick(Sender: TObject);
     procedure btnRightClick(Sender: TObject);
@@ -183,11 +185,12 @@ type
       bGeneratedSuccessfully, bLoadSettings, bResetupIni: Boolean;
     function OpenImageFileSelect(sTitle : String): String;
     function ShellExecuteAndWait(FileName, Params, lpVerb: string): bool;
-    procedure SaveSettings(sSpecificSection: String = ''; sSpecificIdent: String = ''; sSpecificValue: String = '');
+    procedure SaveSettings(sSpecificSection: String = ''; sSpecificIdent: String = ''; sSpecificValue: String = ''; bShowMessage: Boolean = True);
     procedure LoadSettings;
     procedure SetupIniForEditing;
     procedure SetupIniForSlicing;
     function FormatBedShapeForLoading(sBedShape: String): TArray<Extended>;
+    function GetFormattedDateTime: String;
   public
     { Public declarations }
   end;
@@ -201,7 +204,7 @@ implementation
 
 ////////////////////////////////////////////////////////////////////////////////
 
-procedure TfrmMain.SaveSettings(sSpecificSection: String = ''; sSpecificIdent: String = ''; sSpecificValue: String = '');
+procedure TfrmMain.SaveSettings(sSpecificSection: String = ''; sSpecificIdent: String = ''; sSpecificValue: String = ''; bShowMessage: Boolean = True);
 var
   Ini: TIniFile;
   bSaved: Boolean;
@@ -214,9 +217,9 @@ begin
 
       if (sSpecificSection <> '') and (sSpecificIdent <> '') and (sSpecificValue <> '') then
       begin
-        if LowerCase(sSpecificValue[1])[1] in ['a'..'z'] then
+        if CharInSet(LowerCase(sSpecificValue[1])[1], ['a'..'z']) then
           Ini.WriteString(sSpecificSection, sSpecificIdent, sSpecificValue)
-        else if (sSpecificValue[1] in ['0'..'9']) or (sSpecificValue[1] in ['-']) then
+        else if (CharInSet(sSpecificValue[1], ['0'..'9'])) or (CharInSet(sSpecificValue[1], ['-'])) then
           Ini.WriteFloat(sSpecificSection, sSpecificIdent, StrToFloat(sSpecificValue));
       end;
 
@@ -272,7 +275,8 @@ begin
       on E: Exception do
       begin
         bSaved := False;
-        ShowMessage('There was an error when saving your settings.');
+        if bShowMessage then
+          ShowMessage('There was an error when saving your settings.');
       end;
     end;
   finally
@@ -280,7 +284,8 @@ begin
   end;
 
   if bSaved then
-    ShowMessage('Settings saved successfully.');
+    if bShowMessage then
+      ShowMessage('Settings saved successfully.');
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -299,8 +304,8 @@ begin
     // Print
       // Layers
       nobxLayerHeight.Value := Ini.ReadFloat('DEFAULT', 'layer_height', 0.2);
-      nobxFLayerHeight.Value := Ini.ReadFloat('DEFAULT', 'first_layer_height', 0.15);
-      nobxMinLayerHeight.Value := Ini.ReadFloat('DEFAULT', 'min_layer_height', 0.2);
+      nobxFLayerHeight.Value := Ini.ReadFloat('DEFAULT', 'first_layer_height', 0.2);
+      nobxMinLayerHeight.Value := Ini.ReadFloat('DEFAULT', 'min_layer_height', 0.15);
       nobxMaxLayerHeight.Value := Ini.ReadFloat('DEFAULT', 'max_layer_height', 0.3);
       // Speed
       nobxInfillSpeed.Value := Ini.ReadFloat('DEFAULT', 'infill_speed', 80);
@@ -434,6 +439,19 @@ begin
   end;
 end;
 
+
+function TfrmMain.GetFormattedDateTime(): String;
+var
+  Time: TDateTime;
+  sTime: String;
+begin
+  Time := Now;
+  sTime := StringReplace(DateTimeToStr(Time), ' ', '_', [rfReplaceAll]);
+  sTime := StringReplace(sTime, '/', '-', [rfReplaceAll]);
+  sTime := StringReplace(sTime, ':', '-', [rfReplaceAll]);
+
+  Result := sTime;
+end;
 ////////////////////////////////////////////////////////////////////////////////
 
 function TfrmMain.OpenImageFileSelect(sTitle : String): String;
@@ -546,15 +564,19 @@ end;
 procedure TfrmMain.btnSliceExportClick(Sender: TObject);
 var
   sSlicerRunArgs, sSlicerExecutable: String;
+  Time: TDateTime;
 begin
 
   SetupIniForSlicing();
 
   sSlicerRunArgs := '--no-gui';
-  sSlicerRunArgs := sSlicerRunArgs + ' --output "' + sGcodeSavePath + '"';
+  sSlicerRunArgs := sSlicerRunArgs + ' --output "' + sGcodeSavePath + '\' + sName +'.gcode"';
   sSlicerRunArgs := sSlicerRunArgs + ' --scale 0.9302325581';
   sSlicerRunArgs := sSlicerRunArgs + ' --load "' + sSiteForgePath + '\config\slicerConfig.ini"';
   sSlicerRunArgs := sSlicerRunArgs + ' "' + sSiteForgePath + '\stl-backups\' + sName + '.stl"';
+  Time := Now;
+  ShowMessage(TimeToStr(Time));
+  sSlicerRunArgs := sSlicerRunArgs + ' > slic3r_log' + TimeToStr(Time) + '.txt 2>&1';
 
   sSlicerExecutable := '"' + sInstalledPath + '\bin\slic3r\Slic3r-console.exe"';
 
@@ -679,6 +701,9 @@ begin
 end;
 
 procedure TfrmMain.FormCreate(Sender: TObject);
+var
+  Time: TDateTime;
+  sTime: String;
 begin
   sSiteForgePath := TPath.Combine(GetEnvironmentVariable('LOCALAPPDATA'), 'SiteForge');
 
@@ -703,11 +728,17 @@ begin
   memPrinterGcodeBeforeLayerChange.Text := '';
   memPrinterGcodeAfterLayerChange.Text := '';
 
+  Time := Now;
+  sTime := StringReplace(DateTimeToStr(Time), ' ', '_', [rfReplaceAll]);
+  sTime := StringReplace(sTime, '/', '-', [rfReplaceAll]);
+  sTime := StringReplace(sTime, ':', '-', [rfReplaceAll]);
+  ShowMessage(sTime);
+
 end;
 
 procedure TfrmMain.tmr10msTimer(Sender: TObject);
 begin
-  sName := edtName.Text;
+  sName := StringReplace(edtName.Text, ' ', '', [rfReplaceAll]);
 
   if (sImgPathRightView <> '') and (sImgPathTopView <> '') and (sImgPathFrontView <> '') and (sSavePath <> '') and (edtName.Text <> '') then
     btnGenerate.Enabled := True
@@ -723,7 +754,7 @@ begin
   if chkbxAutoCountThreads.Checked and (nobxNumberThreads.Value <> System.CPUCount) then
   begin
     nobxNumberThreads.Value := System.CPUCount;
-    SaveSettings();
+    SaveSettings('DEFAULT', 'threads', FloatToStr(nobxNumberThreads.Value), False);
   end;
 
 end;

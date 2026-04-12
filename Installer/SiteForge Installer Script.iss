@@ -31,8 +31,8 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
-;PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
+PrivilegesRequired=lowest
+;PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=C:\Not_Onedrive\GitHub\SIP-Project-2026\Installer
 OutputBaseFilename=SiteForge Installer
 SetupIconFile=C:\Not_Onedrive\GitHub\SIP-Project-2026\Design\SiteForge_Logo_V4-4.ico
@@ -50,6 +50,7 @@ Name: "{app}\bin"; Flags: uninsalwaysuninstall
 Name: "{app}\bin\python"; Flags: uninsalwaysuninstall
 Name: "{app}\bin\slic3r"; Flags: uninsalwaysuninstall
 Name: "{localappdata}\SiteForge\config";
+Name: "{localappdata}\SiteForge\logs";
 
 [Files]
 Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Delphi\Win64\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion

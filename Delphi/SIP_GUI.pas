@@ -162,6 +162,8 @@ type
     btnSavePreferences: TButton;
     Label1: TLabel;
     chkbxAutoCountThreads: TCheckBox;
+    Label2: TLabel;
+    Shape6: TShape;
     procedure btnFrontClick(Sender: TObject);
     procedure btnTopClick(Sender: TObject);
     procedure btnRightClick(Sender: TObject);
@@ -188,6 +190,7 @@ type
     procedure SetupIniForEditing;
     procedure SetupIniForSlicing;
     function FormatBedShapeForLoading(sBedShape: String): TArray<Extended>;
+    function GetFormattedDateTime: String;
   public
     { Public declarations }
   end;
@@ -301,8 +304,8 @@ begin
     // Print
       // Layers
       nobxLayerHeight.Value := Ini.ReadFloat('DEFAULT', 'layer_height', 0.2);
-      nobxFLayerHeight.Value := Ini.ReadFloat('DEFAULT', 'first_layer_height', 0.15);
-      nobxMinLayerHeight.Value := Ini.ReadFloat('DEFAULT', 'min_layer_height', 0.2);
+      nobxFLayerHeight.Value := Ini.ReadFloat('DEFAULT', 'first_layer_height', 0.2);
+      nobxMinLayerHeight.Value := Ini.ReadFloat('DEFAULT', 'min_layer_height', 0.15);
       nobxMaxLayerHeight.Value := Ini.ReadFloat('DEFAULT', 'max_layer_height', 0.3);
       // Speed
       nobxInfillSpeed.Value := Ini.ReadFloat('DEFAULT', 'infill_speed', 80);
@@ -436,6 +439,55 @@ begin
   end;
 end;
 
+
+function TfrmMain.GetFormattedDateTime(): String;
+var
+  Time: TDateTime;
+  sTime: String;
+begin
+  Time := Now;
+  sTime := StringReplace(DateTimeToStr(Time), ' ', '_', [rfReplaceAll]);
+  sTime := StringReplace(sTime, '/', '-', [rfReplaceAll]);
+  sTime := StringReplace(sTime, ':', '-', [rfReplaceAll]);
+
+  Result := sTime;
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function TfrmMain.ShellExecuteAndWait(FileName, Params, lpVerb: string): bool;
+var
+  exInfo: TShellExecuteInfo;
+  Ph: DWORD;
+begin
+
+  FillChar(exInfo, SizeOf(exInfo), 0);
+  with exInfo do
+  begin
+    cbSize := SizeOf(exInfo);
+    fMask := SEE_MASK_NOCLOSEPROCESS or SEE_MASK_FLAG_DDEWAIT;
+    Wnd := GetActiveWindow();
+    exInfo.lpVerb := lpVerb;
+    exInfo.lpParameters := PChar(Params);
+    lpFile := PChar(FileName);
+    nShow := SW_HIDE;
+  end;
+  if ShellExecuteEx(@exInfo) then
+    Ph := exInfo.hProcess
+  else
+  begin
+    ShowMessage(SysErrorMessage(GetLastError));
+    Result := true;
+    exit;
+  end;
+  while WaitForSingleObject(exInfo.hProcess, 50) <> WAIT_OBJECT_0 do
+    Application.ProcessMessages;
+  CloseHandle(Ph);
+
+  Result := true;
+
+end;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 function TfrmMain.OpenImageFileSelect(sTitle : String): String;
@@ -486,39 +538,6 @@ begin
     sSavePath := redtSavePathDisplay.Text;
 end;
 
-function TfrmMain.ShellExecuteAndWait(FileName, Params, lpVerb: string): bool;
-var
-  exInfo: TShellExecuteInfo;
-  Ph: DWORD;
-begin
-
-  FillChar(exInfo, SizeOf(exInfo), 0);
-  with exInfo do
-  begin
-    cbSize := SizeOf(exInfo);
-    fMask := SEE_MASK_NOCLOSEPROCESS or SEE_MASK_FLAG_DDEWAIT;
-    Wnd := GetActiveWindow();
-    exInfo.lpVerb := lpVerb;
-    exInfo.lpParameters := PChar(Params);
-    lpFile := PChar(FileName);
-    nShow := SW_HIDE;
-  end;
-  if ShellExecuteEx(@exInfo) then
-    Ph := exInfo.hProcess
-  else
-  begin
-    ShowMessage(SysErrorMessage(GetLastError));
-    Result := true;
-    exit;
-  end;
-  while WaitForSingleObject(exInfo.hProcess, 50) <> WAIT_OBJECT_0 do
-    Application.ProcessMessages;
-  CloseHandle(Ph);
-
-  Result := true;
-
-end;
-
 procedure TfrmMain.btnRightClick(Sender: TObject);
 var
   sFilePath: String;
@@ -553,10 +572,11 @@ begin
   SetupIniForSlicing();
 
   sSlicerRunArgs := '--no-gui';
-  sSlicerRunArgs := sSlicerRunArgs + ' --output "' + sGcodeSavePath + '"';
+  sSlicerRunArgs := sSlicerRunArgs + ' --output "' + sGcodeSavePath + '\' + sName +'.gcode"';
   sSlicerRunArgs := sSlicerRunArgs + ' --scale 0.9302325581';
   sSlicerRunArgs := sSlicerRunArgs + ' --load "' + sSiteForgePath + '\config\slicerConfig.ini"';
   sSlicerRunArgs := sSlicerRunArgs + ' "' + sSiteForgePath + '\stl-backups\' + sName + '.stl"';
+  sSlicerRunArgs := sSlicerRunArgs + ' > ' + sSiteForgePath + '\logs\slic3r_log_' + GetFormattedDateTime() + '.txt 2>&1'; // _' + GetFormattedDateTime() + '
 
   sSlicerExecutable := '"' + sInstalledPath + '\bin\slic3r\Slic3r-console.exe"';
 
@@ -709,7 +729,7 @@ end;
 
 procedure TfrmMain.tmr10msTimer(Sender: TObject);
 begin
-  sName := edtName.Text;
+  sName := StringReplace(edtName.Text, ' ', '', [rfReplaceAll]);
 
   if (sImgPathRightView <> '') and (sImgPathTopView <> '') and (sImgPathFrontView <> '') and (sSavePath <> '') and (edtName.Text <> '') then
     btnGenerate.Enabled := True
