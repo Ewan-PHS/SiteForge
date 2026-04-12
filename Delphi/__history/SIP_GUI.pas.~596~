@@ -215,6 +215,8 @@ begin
   try
     try
 
+      SetupIniForEditing();
+
       if (sSpecificSection <> '') and (sSpecificIdent <> '') and (sSpecificValue <> '') then
       begin
         if CharInSet(LowerCase(sSpecificValue[1])[1], ['a'..'z']) then
@@ -301,6 +303,9 @@ begin
   Ini := TIniFile.Create(ChangeFileExt(sSiteForgePath, '\config\slicerConfig.ini'));
   try
     try
+
+      SetupIniForEditing();
+
     // Print
       // Layers
       nobxLayerHeight.Value := Ini.ReadFloat('DEFAULT', 'layer_height', 0.2);
@@ -369,12 +374,21 @@ end;
 
 procedure TfrmMain.SetupIniForEditing();
 var
-  sLoadedIniFile: String;
+  DefaultLCID: LCID;
+  sLoadedIniFile, sDecimalSeperator: String;
 begin
   sLoadedIniFile := TFile.ReadAllText(sSiteForgePath + '\config\slicerConfig.ini');
 
   if sLoadedIniFile[1] <> '[' then
     sLoadedIniFile := '[DEFAULT]' + sLoadedIniFile;
+
+  try
+    sDecimalSeperator := trim(GetLocaleChar(DefaultLCID, LOCALE_SDECIMAL, '.'));
+  except
+    sDecimalSeperator := '.';
+  end;
+
+  sLoadedIniFile := StringReplace(sLoadedIniFile, '.', sDecimalSeperator, [rfReplaceAll]);
 
   TFile.WriteAllText(sSiteForgePath + '\config\slicerConfig.ini', sLoadedIniFile);
 end;
@@ -382,11 +396,20 @@ end;
 procedure TfrmMain.SetupIniForSlicing();
 var
   sLoadedIniFile: String;
+  iIndex: Integer;
 begin
   sLoadedIniFile := TFile.ReadAllText(sSiteForgePath + '\config\slicerConfig.ini');
 
   if sLoadedIniFile[1] = '[' then
     Delete(sLoadedIniFile, 1, 9);
+
+  sLoadedIniFile := StringReplace(sLoadedIniFile, ',', '.', [rfReplaceAll]);
+
+  sLoadedIniFile := StringReplace(sLoadedIniFile, '.', ',', []);
+  sLoadedIniFile := StringReplace(sLoadedIniFile, '.', ',', []);
+  sLoadedIniFile := StringReplace(sLoadedIniFile, '.', ',', []);
+  sLoadedIniFile := StringReplace(sLoadedIniFile, '.', ',', []);
+  sLoadedIniFile := StringReplace(sLoadedIniFile, '.', ',', []);
 
   TFile.WriteAllText(sSiteForgePath + '\config\slicerConfig.ini', sLoadedIniFile);
 end;
@@ -452,6 +475,107 @@ begin
 
   Result := sTime;
 end;
+
+////////////////////////////////////////////////////////////////////////////////
+
+//function TfrmMain.ShellExecuteAndWait(FileName, Params, lpVerb: string): bool;
+//var
+//  exInfo: TShellExecuteInfo;
+//  Ph: DWORD;
+//begin
+//
+//  FillChar(exInfo, SizeOf(exInfo), 0);
+//  with exInfo do
+//  begin
+//    cbSize := SizeOf(exInfo);
+//    fMask := SEE_MASK_NOCLOSEPROCESS or SEE_MASK_FLAG_DDEWAIT;
+//    Wnd := GetActiveWindow();
+//    exInfo.lpVerb := lpVerb;
+//    exInfo.lpParameters := PChar(Params);
+//    lpFile := PChar(FileName);
+//    nShow := SW_HIDE;
+//  end;
+//  if ShellExecuteEx(@exInfo) then
+//    Ph := exInfo.hProcess
+//  else
+//  begin
+//    ShowMessage(SysErrorMessage(GetLastError));
+//    Result := true;
+//    exit;
+//  end;
+//  while WaitForSingleObject(exInfo.hProcess, 50) <> WAIT_OBJECT_0 do
+//    Application.ProcessMessages;
+//  CloseHandle(Ph);
+//
+//  Result := true;
+//
+//end;
+
+function TfrmMain.ShellExecuteAndWait(FileName, Params, lpVerb: string): bool;
+var
+  SI: TStartupInfo;
+  PI: TProcessInformation;
+  SA: TSecurityAttributes;
+  LogHandle: THandle;
+  Cmd: string;
+  LogPath: string;
+begin
+  Result := False;
+
+  // Build the full command string (same as how ShellExecute used FileName + Params)
+  Cmd := '"' + FileName + '" ' + Params;
+
+  // Log file will be created next to your exe
+  LogPath := ExtractFilePath(Application.ExeName) + 'slic3r.log';
+
+  // Security attributes — must be inheritable so CreateProcess can pass the handle
+  SA.nLength := SizeOf(SA);
+  SA.lpSecurityDescriptor := nil;
+  SA.bInheritHandle := True;
+
+  // Create the log file (overwrites previous log each run)
+  LogHandle := CreateFile(
+    PChar(LogPath),
+    GENERIC_WRITE,
+    FILE_SHARE_READ,
+    @SA,
+    CREATE_ALWAYS,
+    FILE_ATTRIBUTE_NORMAL,
+    0
+  );
+
+  if LogHandle = INVALID_HANDLE_VALUE then
+  begin
+    ShowMessage('Could not create log file: ' + SysErrorMessage(GetLastError));
+    Exit;
+  end;
+
+  try
+    ZeroMemory(@SI, SizeOf(SI));
+    SI.cb        := SizeOf(SI);
+    SI.dwFlags   := STARTF_USESTDHANDLES or STARTF_USESHOWWINDOW;
+    SI.wShowWindow := SW_HIDE;
+    SI.hStdOutput  := LogHandle;
+    SI.hStdError   := LogHandle; // Capture both stdout and stderr
+
+    if CreateProcess(nil, PChar(Cmd), nil, nil, True, 0, nil, nil, SI, PI) then
+    begin
+      // Same pattern as your original — pump messages while waiting
+      while WaitForSingleObject(PI.hProcess, 50) <> WAIT_OBJECT_0 do
+        Application.ProcessMessages;
+
+      CloseHandle(PI.hProcess);
+      CloseHandle(PI.hThread);
+      Result := True;
+    end
+    else
+      ShowMessage('CreateProcess failed: ' + SysErrorMessage(GetLastError));
+
+  finally
+    CloseHandle(LogHandle);
+  end;
+end;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 function TfrmMain.OpenImageFileSelect(sTitle : String): String;
@@ -502,39 +626,6 @@ begin
     sSavePath := redtSavePathDisplay.Text;
 end;
 
-function TfrmMain.ShellExecuteAndWait(FileName, Params, lpVerb: string): bool;
-var
-  exInfo: TShellExecuteInfo;
-  Ph: DWORD;
-begin
-
-  FillChar(exInfo, SizeOf(exInfo), 0);
-  with exInfo do
-  begin
-    cbSize := SizeOf(exInfo);
-    fMask := SEE_MASK_NOCLOSEPROCESS or SEE_MASK_FLAG_DDEWAIT;
-    Wnd := GetActiveWindow();
-    exInfo.lpVerb := lpVerb;
-    exInfo.lpParameters := PChar(Params);
-    lpFile := PChar(FileName);
-    nShow := SW_HIDE;
-  end;
-  if ShellExecuteEx(@exInfo) then
-    Ph := exInfo.hProcess
-  else
-  begin
-    ShowMessage(SysErrorMessage(GetLastError));
-    Result := true;
-    exit;
-  end;
-  while WaitForSingleObject(exInfo.hProcess, 50) <> WAIT_OBJECT_0 do
-    Application.ProcessMessages;
-  CloseHandle(Ph);
-
-  Result := true;
-
-end;
-
 procedure TfrmMain.btnRightClick(Sender: TObject);
 var
   sFilePath: String;
@@ -575,7 +666,7 @@ begin
   sSlicerRunArgs := sSlicerRunArgs + ' "' + sSiteForgePath + '\stl-backups\' + sName + '.stl"';
   sSlicerRunArgs := sSlicerRunArgs + ' > ' + sSiteForgePath + '\logs\slic3r_log_' + GetFormattedDateTime() + '.txt 2>&1'; // _' + GetFormattedDateTime() + '
 
-  sSlicerExecutable := '"' + sInstalledPath + '\bin\slic3r\Slic3r-console.exe"';
+  sSlicerExecutable := '' + sInstalledPath + '\bin\slic3r\Slic3r-console.exe';
 
   if ShellExecuteAndWait(sSlicerExecutable, sSlicerRunArgs, 'runas') then
     ShowMessage('Your 3D model has been sliced successfully.')
@@ -672,7 +763,7 @@ begin
 
   sRenderedModelPath := '' + sSiteForgePath + '\renders\rendered_' + sName + '.png';
 
-  sPythonExecutable := '"' + sInstalledPath + '\bin\python\V3.exe"';
+  sPythonExecutable := '' + sInstalledPath + '\bin\python\V3.exe';
 
   bGeneratedSuccessfully := True;
 

@@ -37,6 +37,8 @@ OutputDir=C:\Not_Onedrive\GitHub\SIP-Project-2026\Installer
 OutputBaseFilename=SiteForge Installer
 SetupIconFile=C:\Not_Onedrive\GitHub\SIP-Project-2026\Design\SiteForge_Logo_V4-4.ico
 SolidCompression=yes
+LZMAUseSeparateProcess=yes
+LZMANumBlockThreads=16
 WizardStyle=modern dark
 
 [Languages]
@@ -50,14 +52,15 @@ Name: "{app}\bin"; Flags: uninsalwaysuninstall
 Name: "{app}\bin\python"; Flags: uninsalwaysuninstall
 Name: "{app}\bin\slic3r"; Flags: uninsalwaysuninstall
 Name: "{localappdata}\SiteForge\config";
-Name: "{localappdata}\SiteForge\logs";
+; Name: "{localappdata}\SiteForge\logs";
 
 [Files]
+; Files listed from smallest to largest
+Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Installer\slicerConfig.ini"; DestDir: "{localappdata}\SiteForge\config"; Flags: ignoreversion uninsneveruninstall
 Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Delphi\Win64\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Python\dist\V3\*"; DestDir: "{app}\bin\python"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Installer\vc_redist.x64.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Installer\Slic3r-1.3.0.64bit\*"; DestDir: "{app}\bin\slic3r"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Installer\slicerConfig.ini"; DestDir: "{localappdata}\SiteForge\config"; Flags: ignoreversion 
+Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Installer\vc_redist.x64.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: "C:\Not_Onedrive\GitHub\SIP-Project-2026\Python\dist\V3\*"; DestDir: "{app}\bin\python"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

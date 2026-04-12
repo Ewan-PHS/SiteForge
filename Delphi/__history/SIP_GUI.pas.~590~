@@ -215,6 +215,8 @@ begin
   try
     try
 
+      SetupIniForEditing();
+
       if (sSpecificSection <> '') and (sSpecificIdent <> '') and (sSpecificValue <> '') then
       begin
         if CharInSet(LowerCase(sSpecificValue[1])[1], ['a'..'z']) then
@@ -301,6 +303,9 @@ begin
   Ini := TIniFile.Create(ChangeFileExt(sSiteForgePath, '\config\slicerConfig.ini'));
   try
     try
+
+      SetupIniForEditing();
+
     // Print
       // Layers
       nobxLayerHeight.Value := Ini.ReadFloat('DEFAULT', 'layer_height', 0.2);
@@ -382,11 +387,20 @@ end;
 procedure TfrmMain.SetupIniForSlicing();
 var
   sLoadedIniFile: String;
+  iIndex: Integer;
 begin
   sLoadedIniFile := TFile.ReadAllText(sSiteForgePath + '\config\slicerConfig.ini');
 
   if sLoadedIniFile[1] = '[' then
     Delete(sLoadedIniFile, 1, 9);
+
+  sLoadedIniFile := StringReplace(sLoadedIniFile, ',', '.', [rfReplaceAll]);
+
+  for iIndex := 1 to 5 do
+  begin
+      sLoadedIniFile := StringReplace(sLoadedIniFile, '.', ',', []);
+
+  end;
 
   TFile.WriteAllText(sSiteForgePath + '\config\slicerConfig.ini', sLoadedIniFile);
 end;
@@ -454,6 +468,39 @@ begin
 end;
 
 ////////////////////////////////////////////////////////////////////////////////
+
+//function TfrmMain.ShellExecuteAndWait(FileName, Params, lpVerb: string): bool;
+//var
+//  exInfo: TShellExecuteInfo;
+//  Ph: DWORD;
+//begin
+//
+//  FillChar(exInfo, SizeOf(exInfo), 0);
+//  with exInfo do
+//  begin
+//    cbSize := SizeOf(exInfo);
+//    fMask := SEE_MASK_NOCLOSEPROCESS or SEE_MASK_FLAG_DDEWAIT;
+//    Wnd := GetActiveWindow();
+//    exInfo.lpVerb := lpVerb;
+//    exInfo.lpParameters := PChar(Params);
+//    lpFile := PChar(FileName);
+//    nShow := SW_HIDE;
+//  end;
+//  if ShellExecuteEx(@exInfo) then
+//    Ph := exInfo.hProcess
+//  else
+//  begin
+//    ShowMessage(SysErrorMessage(GetLastError));
+//    Result := true;
+//    exit;
+//  end;
+//  while WaitForSingleObject(exInfo.hProcess, 50) <> WAIT_OBJECT_0 do
+//    Application.ProcessMessages;
+//  CloseHandle(Ph);
+//
+//  Result := true;
+//
+//end;
 
 function TfrmMain.ShellExecuteAndWait(FileName, Params, lpVerb: string): bool;
 var
@@ -610,7 +657,7 @@ begin
   sSlicerRunArgs := sSlicerRunArgs + ' "' + sSiteForgePath + '\stl-backups\' + sName + '.stl"';
   sSlicerRunArgs := sSlicerRunArgs + ' > ' + sSiteForgePath + '\logs\slic3r_log_' + GetFormattedDateTime() + '.txt 2>&1'; // _' + GetFormattedDateTime() + '
 
-  sSlicerExecutable := '"' + sInstalledPath + '\bin\slic3r\Slic3r-console.exe"';
+  sSlicerExecutable := '' + sInstalledPath + '\bin\slic3r\Slic3r-console.exe';
 
   if ShellExecuteAndWait(sSlicerExecutable, sSlicerRunArgs, 'runas') then
     ShowMessage('Your 3D model has been sliced successfully.')
@@ -707,7 +754,7 @@ begin
 
   sRenderedModelPath := '' + sSiteForgePath + '\renders\rendered_' + sName + '.png';
 
-  sPythonExecutable := '"' + sInstalledPath + '\bin\python\V3.exe"';
+  sPythonExecutable := '' + sInstalledPath + '\bin\python\V3.exe';
 
   bGeneratedSuccessfully := True;
 

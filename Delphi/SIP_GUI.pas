@@ -215,6 +215,8 @@ begin
   try
     try
 
+      SetupIniForEditing();
+
       if (sSpecificSection <> '') and (sSpecificIdent <> '') and (sSpecificValue <> '') then
       begin
         if CharInSet(LowerCase(sSpecificValue[1])[1], ['a'..'z']) then
@@ -301,6 +303,9 @@ begin
   Ini := TIniFile.Create(ChangeFileExt(sSiteForgePath, '\config\slicerConfig.ini'));
   try
     try
+
+      SetupIniForEditing();
+
     // Print
       // Layers
       nobxLayerHeight.Value := Ini.ReadFloat('DEFAULT', 'layer_height', 0.2);
@@ -369,12 +374,22 @@ end;
 
 procedure TfrmMain.SetupIniForEditing();
 var
-  sLoadedIniFile: String;
+  DefaultLCID: LCID;
+  sLoadedIniFile, sDecimalSeperator: String;
 begin
   sLoadedIniFile := TFile.ReadAllText(sSiteForgePath + '\config\slicerConfig.ini');
 
   if sLoadedIniFile[1] <> '[' then
     sLoadedIniFile := '[DEFAULT]' + sLoadedIniFile;
+
+  DefaultLCID := GetThreadLocale;
+  try
+    sDecimalSeperator := trim(GetLocaleChar(DefaultLCID, LOCALE_SDECIMAL, '.'));
+  except
+    sDecimalSeperator := '.';
+  end;
+
+  sLoadedIniFile := StringReplace(sLoadedIniFile, '.', sDecimalSeperator, [rfReplaceAll]);
 
   TFile.WriteAllText(sSiteForgePath + '\config\slicerConfig.ini', sLoadedIniFile);
 end;
@@ -387,6 +402,14 @@ begin
 
   if sLoadedIniFile[1] = '[' then
     Delete(sLoadedIniFile, 1, 9);
+
+  sLoadedIniFile := StringReplace(sLoadedIniFile, ',', '.', [rfReplaceAll]);
+
+  sLoadedIniFile := StringReplace(sLoadedIniFile, '.', ',', []);
+  sLoadedIniFile := StringReplace(sLoadedIniFile, '.', ',', []);
+  sLoadedIniFile := StringReplace(sLoadedIniFile, '.', ',', []);
+  sLoadedIniFile := StringReplace(sLoadedIniFile, '.', ',', []);
+  sLoadedIniFile := StringReplace(sLoadedIniFile, '.', ',', []);
 
   TFile.WriteAllText(sSiteForgePath + '\config\slicerConfig.ini', sLoadedIniFile);
 end;
@@ -578,7 +601,7 @@ begin
   sSlicerRunArgs := sSlicerRunArgs + ' "' + sSiteForgePath + '\stl-backups\' + sName + '.stl"';
   sSlicerRunArgs := sSlicerRunArgs + ' > ' + sSiteForgePath + '\logs\slic3r_log_' + GetFormattedDateTime() + '.txt 2>&1'; // _' + GetFormattedDateTime() + '
 
-  sSlicerExecutable := '"' + sInstalledPath + '\bin\slic3r\Slic3r-console.exe"';
+  sSlicerExecutable := '' + sInstalledPath + '\bin\slic3r\Slic3r-console.exe';
 
   if ShellExecuteAndWait(sSlicerExecutable, sSlicerRunArgs, 'runas') then
     ShowMessage('Your 3D model has been sliced successfully.')
@@ -675,7 +698,7 @@ begin
 
   sRenderedModelPath := '' + sSiteForgePath + '\renders\rendered_' + sName + '.png';
 
-  sPythonExecutable := '"' + sInstalledPath + '\bin\python\V3.exe"';
+  sPythonExecutable := '' + sInstalledPath + '\bin\python\V3.exe';
 
   bGeneratedSuccessfully := True;
 
