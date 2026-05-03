@@ -20,9 +20,9 @@ def setXYZComponents(Index):
 
 jsonFiles = {}
 
-rootPath = Path("test_square.sfmodel")
+rootPath = Path("C:\\Not_Onedrive\\GitHub\\SIP-Project-2026\\Version-2\\Python\\test_json")
 
-if rootPath.suffix == ".sfmodel" or ".sfm" or ".zip":
+if (rootPath.suffix == ".sfmodel") or (rootPath.suffix == ".sfm") or (rootPath.suffix == ".zip"):
     with ZipFile(rootPath) as openedZIP:
         for file in iter(openedZIP.filelist):
             if (not file.is_dir()) and (not file.filename.find(".json") == -1):
@@ -39,6 +39,10 @@ else:
 fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
 
+xPoints = []
+yPoints = []
+zPoints = []
+
 for key in jsonFiles:
     currentJson = jsonFiles[key]
     for i in range(len(currentJson["lines"])):
@@ -53,7 +57,22 @@ for key in jsonFiles:
         xComponent = setXYZComponents(0)
         yComponent = setXYZComponents(1)
         zComponent = setXYZComponents(2)
-    
-        ax.plot(xComponent,yComponent,zComponent, color=currentJson["data"]["colour"], linestyle= lineType)
 
+        xPoints = list(set(xPoints) | set(xComponent))
+        yPoints = list(set(yPoints) | set(yComponent))
+        zPoints = list(set(zPoints) | set(zComponent))
+
+        # ax.plot(xComponent,yComponent,zComponent, color=currentJson["data"]["colour"], linestyle= lineType)
+        # ax.scatter(xComponent,yComponent,zComponent, color=currentJson["data"]["colour"])
+
+candidateVerticies = []
+candidateEdges = []
+
+for x in xPoints:
+    for y in yPoints:
+        for z in zPoints:
+            ax.scatter([x],[y],[z],color='black')
+            candidateVerticies.append([x,y,z])
+
+print(len(candidateVerticies))
 plt.show()
