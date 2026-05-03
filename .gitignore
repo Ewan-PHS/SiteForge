@@ -1,7 +1,0 @@
-Installer/SiteForge Installer.exe
-*.pyd
-*.dll
-/Python/build
-Python/V3.spec
-Installer/Slic3r-1.3.0.64bit
-Delphi/Win64/Debug/bin
