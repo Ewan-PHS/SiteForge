@@ -43,6 +43,8 @@ xPoints = []
 yPoints = []
 zPoints = []
 
+viewsData = {} # formatted as {viewname: {linetype: {lines: {}, verticies: {} } } }
+
 for key in jsonFiles:
     currentJson = jsonFiles[key]
     for i in range(len(currentJson["lines"])):
@@ -62,6 +64,8 @@ for key in jsonFiles:
         yPoints = list(set(yPoints) | set(yComponent))
         zPoints = list(set(zPoints) | set(zComponent))
 
+        # viewsData.update({key: {currentJson["lines"][i]["linetype"]: {"verticies": [[]]}}}) this is bad, it needs to be outside these loops in another loop like this one but after it so it can access all the points once they have been generated
+
         # ax.plot(xComponent,yComponent,zComponent, color=currentJson["data"]["colour"], linestyle= lineType)
         # ax.scatter(xComponent,yComponent,zComponent, color=currentJson["data"]["colour"])
 
@@ -73,6 +77,8 @@ for x in xPoints:
         for z in zPoints:
             ax.scatter([x],[y],[z],color='black')
             candidateVerticies.append([x,y,z])
+
+print(jsonFiles)
 
 print(len(candidateVerticies))
 plt.show()
