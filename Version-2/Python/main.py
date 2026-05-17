@@ -4,17 +4,35 @@ import math
 import matplotlib.pyplot as plt
 from pathlib import Path
 
+from flask import views
+
 ##########################################################################
 
-def setXYZComponents(Index):
-    if currentJson["data"]["orientation"][Index] == "x":
-        varToSet = [currentJson["lines"][i]['X1'], currentJson["lines"][i]['X2']]
-    elif currentJson["data"]["orientation"][Index] == "y":
-        varToSet = [currentJson["lines"][i]['Y1'], currentJson["lines"][i]['Y2']]
-    elif currentJson["data"]["orientation"][Index] == "0":
+def setXYZComponents(Input, Index):
+    if Input["data"]["orientation"][Index] == "x":
+        varToSet = [Input["lines"][i]['X1'], Input["lines"][i]['X2']]
+    elif Input["data"]["orientation"][Index] == "y":
+        varToSet = [Input["lines"][i]['Y1'], Input["lines"][i]['Y2']]
+    elif Input["data"]["orientation"][Index] == "0":
         varToSet = [0,0]
     
     return varToSet
+
+def convertXYAndOrientationToXYZ(InputPt, Orientation):
+    # Input point formatted as [X, Y]
+    ptX, ptY = InputPt
+
+    outputPt = []
+
+    for i in range(len(Orientation)):
+        if Orientation[i] == "x":
+            outputPt.append(ptX)
+        elif Orientation[i] == "y":
+            outputPt.append(ptY)
+        else:
+            outputPt.append(Orientation[i])
+
+    return outputPt
 
 ##########################################################################
 
@@ -43,7 +61,7 @@ xPoints = []
 yPoints = []
 zPoints = []
 
-viewsData = {} # formatted as {viewname: {linetype: {lines: {}, verticies: {} } } }
+viewsData = {} # formatted as {viewname: {linetype: {lines: [], verticies: [] } } }
 
 for key in jsonFiles:
     currentJson = jsonFiles[key]
@@ -56,9 +74,9 @@ for key in jsonFiles:
             case 'center':
                 lineType = '-.'
 
-        xComponent = setXYZComponents(0)
-        yComponent = setXYZComponents(1)
-        zComponent = setXYZComponents(2)
+        xComponent = setXYZComponents(currentJson, 0)
+        yComponent = setXYZComponents(currentJson, 1)
+        zComponent = setXYZComponents(currentJson, 2)
 
         xPoints = list(set(xPoints) | set(xComponent))
         yPoints = list(set(yPoints) | set(yComponent))
@@ -67,7 +85,24 @@ for key in jsonFiles:
         # viewsData.update({key: {currentJson["lines"][i]["linetype"]: {"verticies": [[]]}}}) this is bad, it needs to be outside these loops in another loop like this one but after it so it can access all the points once they have been generated
 
         # ax.plot(xComponent,yComponent,zComponent, color=currentJson["data"]["colour"], linestyle= lineType)
-        # ax.scatter(xComponent,yComponent,zComponent, color=currentJson["data"]["colour"])
+        ax.scatter(xComponent,yComponent,zComponent, color=currentJson["data"]["colour"])
+
+for key in jsonFiles:
+    currentJson = jsonFiles[key]
+    viewsData.update({key: {}})
+    for linetype in ["solid", "hidden", "center"]:
+
+        viewsData[key].update({linetype:{"lines":[], "verticies": []}})
+
+        for i in range(len(currentJson["lines"])):
+            if currentJson["lines"][i]["line_type"] == linetype:
+                viewsData[key][linetype]["verticies"].append(convertXYAndOrientationToXYZ([currentJson["lines"][i]["X1"], currentJson["lines"][i]["Y1"]], currentJson["data"]["orientation"]))
+                viewsData[key][linetype]["verticies"].append(convertXYAndOrientationToXYZ([currentJson["lines"][i]["X2"], currentJson["lines"][i]["Y2"]], currentJson["data"]["orientation"]))
+                
+            # print(viewsData)
+            # viewsData[key][linetype]["verticies"].append([setXYZComponents(currentJson, 0), setXYZComponents(currentJson, 1), setXYZComponents(currentJson, 2)])
+
+print(viewsData)
 
 candidateVerticies = []
 candidateEdges = []
@@ -75,10 +110,10 @@ candidateEdges = []
 for x in xPoints:
     for y in yPoints:
         for z in zPoints:
-            ax.scatter([x],[y],[z],color='black')
+            # ax.scatter([x],[y],[z],color='black')
             candidateVerticies.append([x,y,z])
 
-print(jsonFiles)
+# print(jsonFiles)
 
-print(len(candidateVerticies))
+# print(len(candidateVerticies))
 plt.show()
