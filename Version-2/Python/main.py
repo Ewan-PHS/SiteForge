@@ -30,7 +30,7 @@ def convertXYAndOrientationToXYZ(InputPt, Orientation):
         elif Orientation[i] == "y":
             outputPt.append(ptY)
         else:
-            outputPt.append(Orientation[i])
+            outputPt.append(int(Orientation[i]))
 
     return outputPt
 
@@ -82,27 +82,42 @@ for key in jsonFiles:
         yPoints = list(set(yPoints) | set(yComponent))
         zPoints = list(set(zPoints) | set(zComponent))
 
-        # viewsData.update({key: {currentJson["lines"][i]["linetype"]: {"verticies": [[]]}}}) this is bad, it needs to be outside these loops in another loop like this one but after it so it can access all the points once they have been generated
-
         # ax.plot(xComponent,yComponent,zComponent, color=currentJson["data"]["colour"], linestyle= lineType)
-        ax.scatter(xComponent,yComponent,zComponent, color=currentJson["data"]["colour"])
+        # ax.scatter(xComponent,yComponent,zComponent, color=currentJson["data"]["colour"])
 
 for key in jsonFiles:
     currentJson = jsonFiles[key]
     viewsData.update({key: {}})
     for linetype in ["solid", "hidden", "center"]:
 
-        viewsData[key].update({linetype:{"lines":[], "verticies": []}})
+        viewsData[key].update({linetype:{"lines":set(), "verticies": set()}})
 
         for i in range(len(currentJson["lines"])):
             if currentJson["lines"][i]["line_type"] == linetype:
-                viewsData[key][linetype]["verticies"].append(convertXYAndOrientationToXYZ([currentJson["lines"][i]["X1"], currentJson["lines"][i]["Y1"]], currentJson["data"]["orientation"]))
-                viewsData[key][linetype]["verticies"].append(convertXYAndOrientationToXYZ([currentJson["lines"][i]["X2"], currentJson["lines"][i]["Y2"]], currentJson["data"]["orientation"]))
+                viewsData[key][linetype]["verticies"].add(tuple(convertXYAndOrientationToXYZ([currentJson["lines"][i]["X1"], currentJson["lines"][i]["Y1"]], currentJson["data"]["orientation"])))
+                viewsData[key][linetype]["verticies"].add(tuple(convertXYAndOrientationToXYZ([currentJson["lines"][i]["X2"], currentJson["lines"][i]["Y2"]], currentJson["data"]["orientation"])))
                 
-            # print(viewsData)
-            # viewsData[key][linetype]["verticies"].append([setXYZComponents(currentJson, 0), setXYZComponents(currentJson, 1), setXYZComponents(currentJson, 2)])
-
 print(viewsData)
+
+# print(viewsData['front']['solid']['verticies'][1][0])
+
+
+
+for viewKey in viewsData:
+    for linetypeKey in ["solid", "hidden", "center"]:
+        for point3D in viewsData[viewKey][linetypeKey]["verticies"]:
+            match linetypeKey:
+                case "solid":
+                    colour = "red"
+                case "hidden":
+                    colour = "blue"
+                case "center":
+                    colour = "green"
+
+            ax.scatter(point3D[0],point3D[1],point3D[2],color=colour)
+
+            # print(point3D[0],point3D[1],point3D[2])
+
 
 candidateVerticies = []
 candidateEdges = []
@@ -116,4 +131,9 @@ for x in xPoints:
 # print(jsonFiles)
 
 # print(len(candidateVerticies))
+
+ax.set_xlabel("X")
+ax.set_ylabel("Y")
+ax.set_zlabel("Z")
+
 plt.show()
