@@ -3,8 +3,9 @@ from zipfile import ZipFile
 import math
 import matplotlib.pyplot as plt
 from pathlib import Path
-
+from itertools import product
 from flask import views
+from sympy import I
 
 ##########################################################################
 
@@ -85,6 +86,10 @@ for key in jsonFiles:
         # ax.plot(xComponent,yComponent,zComponent, color=currentJson["data"]["colour"], linestyle= lineType)
         # ax.scatter(xComponent,yComponent,zComponent, color=currentJson["data"]["colour"])
 
+allSolidVerticies = set()
+allHiddenVerticies = set()
+allCenterVerticies = set()
+
 for key in jsonFiles:
     currentJson = jsonFiles[key]
     viewsData.update({key: {}})
@@ -96,11 +101,23 @@ for key in jsonFiles:
             if currentJson["lines"][i]["line_type"] == linetype:
                 viewsData[key][linetype]["verticies"].add(tuple(convertXYAndOrientationToXYZ([currentJson["lines"][i]["X1"], currentJson["lines"][i]["Y1"]], currentJson["data"]["orientation"])))
                 viewsData[key][linetype]["verticies"].add(tuple(convertXYAndOrientationToXYZ([currentJson["lines"][i]["X2"], currentJson["lines"][i]["Y2"]], currentJson["data"]["orientation"])))
-                
-print(viewsData)
+            
+            if currentJson["lines"][i]["line_type"] == "solid":
+                allSolidVerticies.add(tuple(convertXYAndOrientationToXYZ([currentJson["lines"][i]["X1"], currentJson["lines"][i]["Y1"]], currentJson["data"]["orientation"])))
+                allSolidVerticies.add(tuple(convertXYAndOrientationToXYZ([currentJson["lines"][i]["X2"], currentJson["lines"][i]["Y2"]], currentJson["data"]["orientation"])))
+         
+            if currentJson["lines"][i]["line_type"] == "hidden":
+                allHiddenVerticies.add(tuple(convertXYAndOrientationToXYZ([currentJson["lines"][i]["X1"], currentJson["lines"][i]["Y1"]], currentJson["data"]["orientation"])))
+                allHiddenVerticies.add(tuple(convertXYAndOrientationToXYZ([currentJson["lines"][i]["X2"], currentJson["lines"][i]["Y2"]], currentJson["data"]["orientation"])))
+
+            if currentJson["lines"][i]["line_type"] == "center":
+                allCenterVerticies.add(tuple(convertXYAndOrientationToXYZ([currentJson["lines"][i]["X1"], currentJson["lines"][i]["Y1"]], currentJson["data"]["orientation"])))
+                allCenterVerticies.add(tuple(convertXYAndOrientationToXYZ([currentJson["lines"][i]["X2"], currentJson["lines"][i]["Y2"]], currentJson["data"]["orientation"])))
+ 
+
+# print(viewsData)
 
 # print(viewsData['front']['solid']['verticies'][1][0])
-
 
 
 for viewKey in viewsData:
@@ -114,23 +131,56 @@ for viewKey in viewsData:
                 case "center":
                     colour = "green"
 
-            ax.scatter(point3D[0],point3D[1],point3D[2],color=colour)
+            # ax.scatter(point3D[0],point3D[1],point3D[2],color=colour)
 
             # print(point3D[0],point3D[1],point3D[2])
 
 
-candidateVerticies = []
-candidateEdges = []
+candidateVerticies = set()
+candidateEdges = set()
 
 for x in xPoints:
     for y in yPoints:
         for z in zPoints:
             # ax.scatter([x],[y],[z],color='black')
-            candidateVerticies.append([x,y,z])
+            candidateVerticies.add(tuple([x,y,z]))
 
-# print(jsonFiles)
 
-# print(len(candidateVerticies))
+candidateSolidVerticies = set()
+xs = {v[0] for v in allSolidVerticies}
+ys = {v[1] for v in allSolidVerticies}
+zs = {v[2] for v in allSolidVerticies}
+
+for x, y, z in product(xs, ys, zs):
+    candidateSolidVerticies.add((x, y, z))
+
+
+# candidateHiddenVerticies = set()
+# xs = {v[0] for v in allHiddenVerticies}
+# ys = {v[1] for v in allHiddenVerticies}
+# zs = {v[2] for v in allHiddenVerticies}
+
+# for x, y, z in product(xs, ys, zs):
+#     candidateHiddenVerticies.add((x, y, z))
+
+
+# candidateCenterVerticies = set()
+# xs = {v[0] for v in allCenterVerticies}
+# ys = {v[1] for v in allCenterVerticies}
+# zs = {v[2] for v in allCenterVerticies}
+
+# for x, y, z in product(xs, ys, zs):
+#     candidateCenterVerticies.add((x, y, z))
+
+
+finalCandidateVerticies = set()
+
+finalCandidateVerticies.update(candidateVerticies & candidateSolidVerticies)
+# finalCandidateVerticies.update(candidateVerticies & candidateHiddenVerticies)
+# finalCandidateVerticies.update(candidateVerticies & candidateCenterVerticies)
+
+for i in range(len(finalCandidateVerticies)):
+    ax.scatter(list(finalCandidateVerticies)[i][0],list(finalCandidateVerticies)[i][1],list(finalCandidateVerticies)[i][2],color='black')
 
 ax.set_xlabel("X")
 ax.set_ylabel("Y")
